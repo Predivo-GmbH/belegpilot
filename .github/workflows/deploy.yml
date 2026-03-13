@@ -22,6 +22,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_PASSWORD_GATE: ${{ secrets.VITE_PASSWORD_GATE }}
 
       # Zero-downtime 3-step deploy to Metanet (plain FTP)
       # Step 1: Upload new assets (JS/CSS with hashed names)
