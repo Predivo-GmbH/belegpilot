@@ -7,6 +7,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Database } from '@/types/database'
+import { usePageTitle } from '@/hooks/usePageTitle'
+import { toast } from 'sonner'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 
@@ -23,6 +25,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
 const inputClass = 'h-10 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground placeholder:text-ink-muted focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring'
 
 export default function Settings() {
+  usePageTitle('Einstellungen')
   const [tab, setTab] = useState<SettingsTab>('firm')
   const { data: profile } = useProfile()
   const { user } = useAuth()
@@ -53,7 +56,11 @@ export default function Settings() {
         .eq('id', org!.id)
       if (error) throw error
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+      toast.success('Firmenprofil gespeichert')
+    },
+    onError: () => toast.error('Fehler beim Speichern'),
   })
 
   // Password change state
@@ -83,6 +90,7 @@ export default function Settings() {
       setPasswordSuccess(true)
       setNewPassword('')
       setConfirmPassword('')
+      toast.success('Passwort erfolgreich geändert')
     }
   }
 
@@ -169,8 +177,8 @@ export default function Settings() {
               Einladen
             </button>
           </div>
-          <div className="rounded-lg border border-border bg-card">
-            <table className="w-full">
+          <div className="overflow-x-auto rounded-lg border border-border bg-card">
+            <table className="w-full min-w-[400px]">
               <thead>
                 <tr className="border-b border-border">
                   <th className="px-4 py-2.5 text-left text-table-header">NAME</th>
@@ -277,11 +285,11 @@ export default function Settings() {
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div>
               <label htmlFor="new-password" className="mb-1 block text-sm font-medium text-foreground">Neues Passwort</label>
-              <input id="new-password" type="password" placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={inputClass} />
+              <input id="new-password" type="password" placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" className={inputClass} />
             </div>
             <div>
               <label htmlFor="confirm-password" className="mb-1 block text-sm font-medium text-foreground">Passwort bestätigen</label>
-              <input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={inputClass} />
+              <input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" className={inputClass} />
             </div>
             {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
             {passwordSuccess && <p className="text-sm text-status-success">Passwort erfolgreich geändert.</p>}

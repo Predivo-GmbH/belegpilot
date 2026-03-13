@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils'
 import { useDocument } from '@/hooks/useDocuments'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { usePageTitle } from '@/hooks/usePageTitle'
+import { toast } from 'sonner'
 
 function ConfidenceDot({ confidence }: { confidence: number }) {
   const color = confidence >= 0.9
@@ -77,6 +79,7 @@ function buildFields(doc: Record<string, unknown>): ExtractionField[] {
 
 export default function DocumentReview() {
   const { id } = useParams()
+  usePageTitle('Dokument')
   const { data: doc, isLoading } = useDocument(id)
   const queryClient = useQueryClient()
 
@@ -93,7 +96,9 @@ export default function DocumentReview() {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
       queryClient.invalidateQueries({ queryKey: ['recent-documents'] })
+      toast.success('Dokument verifiziert')
     },
+    onError: () => toast.error('Fehler beim Verifizieren'),
   })
 
   if (isLoading) {

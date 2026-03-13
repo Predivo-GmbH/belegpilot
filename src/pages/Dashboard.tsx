@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { useProfile } from '@/hooks/useProfile'
 import { useDashboardStats, useRecentDocuments } from '@/hooks/useDashboardStats'
 import { DOCUMENT_STATUSES } from '@/lib/constants'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 const STATUS_STYLES: Record<string, string> = {
   success: 'text-status-success',
@@ -25,6 +26,7 @@ function formatCHF(amount: number): string {
 }
 
 export default function Dashboard() {
+  usePageTitle('Dashboard')
   const { data: profile } = useProfile()
   const { data: stats } = useDashboardStats()
   const { data: recentDocs } = useRecentDocuments()
@@ -79,7 +81,8 @@ export default function Dashboard() {
           </Link>
         </div>
         {recentDocs && recentDocs.length > 0 ? (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-border">
                 <th className="px-4 py-2.5 text-left text-table-header">DOKUMENT</th>
@@ -119,6 +122,7 @@ export default function Dashboard() {
               })}
             </tbody>
           </table>
+          </div>
         ) : (
           <div className="p-8 text-center text-sm text-ink-muted">
             Noch keine Dokumente vorhanden. Laden Sie Ihren ersten Beleg hoch.

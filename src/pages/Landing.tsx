@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { SUBSCRIPTION_TIERS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 /* ── Logo component (reused from sidebar) ── */
 function BelegPilotLogo({ size = 'sm' }: { size?: 'sm' | 'lg' }) {
@@ -136,6 +137,7 @@ const STEPS = [
 ]
 
 export default function Landing() {
+  usePageTitle()
   return (
     <div className="min-h-screen bg-background">
       {/* ── Navbar ── */}

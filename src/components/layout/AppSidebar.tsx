@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -6,6 +7,8 @@ import {
   Users,
   Download,
   Settings,
+  Menu,
+  X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -37,11 +40,11 @@ const NAV_SECTIONS = [
   },
 ]
 
-export function AppSidebar() {
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation()
 
   return (
-    <aside className="hidden w-[220px] shrink-0 border-r border-border bg-card lg:flex lg:flex-col">
+    <>
       {/* Logo */}
       <div className="flex h-14 items-center gap-2.5 border-b border-border px-4">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
@@ -71,6 +74,7 @@ export function AppSidebar() {
                   <Link
                     key={item.href}
                     to={item.href}
+                    onClick={onNavigate}
                     className={cn(
                       'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
                       isActive
@@ -87,6 +91,52 @@ export function AppSidebar() {
           </div>
         ))}
       </nav>
+    </>
+  )
+}
+
+export function MobileMenuButton() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Menü öffnen"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-foreground hover:bg-muted lg:hidden"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      {/* Mobile drawer */}
+      {open && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-foreground/20 lg:hidden"
+            onClick={() => setOpen(false)}
+          />
+          <div className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col bg-card shadow-lg lg:hidden">
+            <div className="flex items-center justify-end p-2">
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="Menü schliessen"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-secondary hover:bg-muted"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <SidebarContent onNavigate={() => setOpen(false)} />
+          </div>
+        </>
+      )}
+    </>
+  )
+}
+
+export function AppSidebar() {
+  return (
+    <aside className="hidden w-[220px] shrink-0 border-r border-border bg-card lg:flex lg:flex-col">
+      <SidebarContent />
     </aside>
   )
 }

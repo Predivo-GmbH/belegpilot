@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /documents
+Disallow: /upload
+Disallow: /settings
+Disallow: /clients
+Disallow: /export
+
+Sitemap: https://belegpilot.predivo.ch/sitemap.xml

@@ -1,6 +1,8 @@
 import { FileQuestion } from 'lucide-react'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 export default function NotFound() {
+  usePageTitle('404')
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">
       <FileQuestion className="h-12 w-12 text-ink-muted" />

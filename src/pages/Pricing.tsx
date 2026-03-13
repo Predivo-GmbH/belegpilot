@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { SUBSCRIPTION_TIERS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 const FEATURE_LABELS: Record<string, string> = {
   'ai-extraction': 'KI-Belegextraktion',
@@ -24,6 +25,7 @@ const FEATURE_LABELS: Record<string, string> = {
 const TIER_KEYS = ['starter', 'professional', 'enterprise'] as const
 
 export default function Pricing() {
+  usePageTitle('Preise')
   const navigate = useNavigate()
 
   function handleSelectPlan(tier: string) {

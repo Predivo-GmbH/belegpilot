@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 type AuthMode = 'login' | 'signup' | 'forgot'
 
 export default function Auth() {
+  usePageTitle('Anmelden')
   const navigate = useNavigate()
   const [mode, setMode] = useState<AuthMode>('login')
   const [email, setEmail] = useState('')
@@ -109,7 +111,7 @@ export default function Auth() {
                 </div>
                 <div>
                   <label htmlFor="login-password" className="mb-1 block text-sm font-medium text-foreground">Passwort</label>
-                  <input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required className={inputClass} />
+                  <input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required autoComplete="current-password" className={inputClass} />
                 </div>
               </div>
               <button type="button" onClick={() => { setMode('forgot'); resetMessages() }} className="text-sm font-medium text-primary hover:underline">
@@ -136,11 +138,11 @@ export default function Auth() {
               <div className="space-y-3">
                 <div>
                   <label htmlFor="signup-org" className="mb-1 block text-sm font-medium text-foreground">Firmenname</label>
-                  <input id="signup-org" type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="Meier Treuhand AG" required className={inputClass} />
+                  <input id="signup-org" type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="Meier Treuhand AG" required maxLength={100} className={inputClass} />
                 </div>
                 <div>
                   <label htmlFor="signup-name" className="mb-1 block text-sm font-medium text-foreground">Vollständiger Name</label>
-                  <input id="signup-name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Sandra Meier" required className={inputClass} />
+                  <input id="signup-name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Sandra Meier" required maxLength={100} className={inputClass} />
                 </div>
                 <div>
                   <label htmlFor="signup-email" className="mb-1 block text-sm font-medium text-foreground">E-Mail</label>
@@ -148,7 +150,7 @@ export default function Auth() {
                 </div>
                 <div>
                   <label htmlFor="signup-password" className="mb-1 block text-sm font-medium text-foreground">Passwort</label>
-                  <input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mindestens 8 Zeichen" required minLength={8} className={inputClass} />
+                  <input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mindestens 8 Zeichen" required minLength={8} maxLength={128} autoComplete="new-password" className={inputClass} />
                 </div>
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}

@@ -4,6 +4,7 @@ import { Toaster } from 'sonner'
 import { Suspense, lazy } from 'react'
 import { PasswordGate } from '@/components/shared/PasswordGate'
 import { ProtectedRoute } from '@/components/shared/ProtectedRoute'
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 
 const Landing = lazy(() => import('@/pages/Landing'))
 const Auth = lazy(() => import('@/pages/Auth'))
@@ -35,28 +36,35 @@ function PageLoader() {
 }
 
 export function App() {
+  const gatePassword = import.meta.env.VITE_PASSWORD_GATE
+  if (!gatePassword) {
+    throw new Error('VITE_PASSWORD_GATE environment variable is required')
+  }
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <PasswordGate password={import.meta.env.VITE_PASSWORD_GATE ?? 'belegpilot2026'}>
-        <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
-              <Route path="/documents/:id" element={<ProtectedRoute><DocumentReview /></ProtectedRoute>} />
-              <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
-              <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
-              <Route path="/export" element={<ProtectedRoute><Export /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </PasswordGate>
-      <Toaster position="top-right" richColors closeButton />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <PasswordGate password={gatePassword}>
+          <BrowserRouter>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+                <Route path="/documents/:id" element={<ProtectedRoute><DocumentReview /></ProtectedRoute>} />
+                <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
+                <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
+                <Route path="/export" element={<ProtectedRoute><Export /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </PasswordGate>
+        <Toaster position="top-right" richColors closeButton />
+      </QueryClientProvider>
+    </ErrorBoundary>
   )
 }

@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
 import { useQueryClient } from '@tanstack/react-query'
+import { usePageTitle } from '@/hooks/usePageTitle'
+import { toast } from 'sonner'
 
 const ACCEPTED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/tiff']
 const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB
@@ -18,7 +20,12 @@ interface UploadFile {
   error?: string
 }
 
+function sanitizeFilename(name: string): string {
+  return name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 200)
+}
+
 export default function Upload() {
+  usePageTitle('Upload')
   const [files, setFiles] = useState<UploadFile[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
   const { user } = useAuth()
@@ -26,12 +33,13 @@ export default function Upload() {
   const queryClient = useQueryClient()
 
   const addFiles = useCallback((newFiles: FileList | File[]) => {
-    const validFiles: UploadFile[] = Array.from(newFiles)
-      .filter((f) => {
-        if (!ACCEPTED_TYPES.includes(f.type)) return false
-        if (f.size > MAX_FILE_SIZE) return false
-        return true
-      })
+    const all = Array.from(newFiles)
+    const rejected = all.filter((f) => !ACCEPTED_TYPES.includes(f.type) || f.size > MAX_FILE_SIZE)
+    if (rejected.length > 0) {
+      toast.error(`${rejected.length} Datei(en) abgelehnt — ungültiges Format oder zu gross`)
+    }
+    const validFiles: UploadFile[] = all
+      .filter((f) => ACCEPTED_TYPES.includes(f.type) && f.size <= MAX_FILE_SIZE)
       .map((f) => ({
         id: crypto.randomUUID(),
         file: f,
@@ -66,7 +74,7 @@ export default function Upload() {
 
     try {
       // Upload to Supabase Storage
-      const filePath = `${orgId}/${Date.now()}-${uploadFile.file.name}`
+      const filePath = `${orgId}/${Date.now()}-${sanitizeFilename(uploadFile.file.name)}`
       const { error: storageError } = await supabase.storage
         .from('documents')
         .upload(filePath, uploadFile.file)
@@ -88,6 +96,7 @@ export default function Upload() {
       if (dbError) throw dbError
 
       setFiles((prev) => prev.map((f) => f.id === uploadFile.id ? { ...f, status: 'done' as const, progress: 100 } : f))
+      toast.success(`${uploadFile.file.name} erfolgreich hochgeladen`)
 
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['documents'] })
@@ -99,6 +108,7 @@ export default function Upload() {
           ? { ...f, status: 'error' as const, error: err instanceof Error ? err.message : 'Upload fehlgeschlagen' }
           : f,
       ))
+      toast.error(`Fehler bei ${uploadFile.file.name}`)
     }
   }
 

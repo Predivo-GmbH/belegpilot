@@ -1,7 +1,9 @@
 import { AppLayout } from '@/components/layout/AppLayout'
 import { Download } from 'lucide-react'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 export default function Export() {
+  usePageTitle('Export')
   return (
     <AppLayout title="Export" subtitle="Exportieren Sie Buchungssätze in Ihr ERP-System.">
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card py-16">

@@ -5,6 +5,7 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { cn } from '@/lib/utils'
 import { DOCUMENT_STATUSES } from '@/lib/constants'
 import { useDocuments } from '@/hooks/useDocuments'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 type StatusFilter = 'all' | keyof typeof DOCUMENT_STATUSES
 
@@ -16,6 +17,7 @@ const STATUS_BADGE_STYLES: Record<string, string> = {
 }
 
 export default function Documents() {
+  usePageTitle('Dokumente')
   const [filter, setFilter] = useState<StatusFilter>('all')
   const [search, setSearch] = useState('')
   const { data: documents, isLoading } = useDocuments({ status: filter, search })
@@ -40,6 +42,7 @@ export default function Documents() {
           <input
             type="text"
             placeholder="Dokumente durchsuchen..."
+            aria-label="Dokumente durchsuchen"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-9 w-full rounded-md border border-input bg-card pl-9 pr-3 text-sm text-foreground placeholder:text-ink-muted focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
@@ -72,8 +75,8 @@ export default function Documents() {
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
         ) : (
-          <>
-            <table className="w-full">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px]">
               <thead>
                 <tr className="border-b border-border">
                   <th className="px-4 py-3 text-left text-table-header">DOKUMENT</th>
@@ -116,7 +119,7 @@ export default function Documents() {
                 Keine Dokumente gefunden.
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </AppLayout>
