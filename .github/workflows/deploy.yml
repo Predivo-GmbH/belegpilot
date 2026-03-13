@@ -23,7 +23,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
-      # Zero-downtime 3-step deploy to Metanet
+      # Zero-downtime 3-step deploy to Metanet (plain FTP)
       # Step 1: Upload new assets (JS/CSS with hashed names)
       - name: Upload assets
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -31,6 +31,8 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
+          protocol: ftp
+          security: loose
           local-dir: ./dist/assets/
           server-dir: belegpilot.predivo.ch/assets/
           dangerous-clean-slate: false
@@ -42,6 +44,8 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
+          protocol: ftp
+          security: loose
           local-dir: ./dist/
           server-dir: belegpilot.predivo.ch/
           exclude: |
@@ -54,6 +58,8 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
+          protocol: ftp
+          security: loose
           local-dir: ./dist/assets/
           server-dir: belegpilot.predivo.ch/assets/
           dangerous-clean-slate: true
