@@ -1,0 +1,30 @@
+name: Security Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  security:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet-4-6
+          review_instructions: |
+            Security-focused review. Check for:
+            1. Input validation & sanitization (XSS, injection)
+            2. Authentication & authorization (Supabase RLS, session handling)
+            3. Secrets exposure (.env, API keys, tokens in client code)
+            4. File upload security (type validation, size limits, path traversal)
+            5. Data privacy (nDSG compliance, PII handling)
+            High-confidence findings only (>80% exploitability).

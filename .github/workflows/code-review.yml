@@ -1,0 +1,30 @@
+name: Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet-4-6
+          review_instructions: |
+            Review this PR for:
+            1. Architecture & code organization
+            2. Correct use of BelegPilot design tokens (no hardcoded colors, fonts, spacing)
+            3. Security (OWASP top 10, input validation, auth checks)
+            4. TypeScript type safety
+            5. Performance (unnecessary re-renders, missing memoization)
+            6. Test coverage for new functionality

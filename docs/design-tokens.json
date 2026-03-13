@@ -1,0 +1,236 @@
+{
+  "$schema": "https://belegpilot.ch/schemas/design-tokens/v1",
+  "$description": "Canonical design tokens for BelegPilot. Single source of truth — all other design docs derive from this file.",
+  "$version": "2.0.0",
+  "$lastAudit": "2026-03-12",
+  "$theme": "light-only",
+
+  "color": {
+    "accent": {
+      "default": "#0E7C6B",
+      "hover": "#0A6355",
+      "active": "#085247",
+      "light": "#E6F5F2",
+      "muted": "#B8DDD6",
+      "on-accent": "#FFFFFF"
+    },
+    "surface": {
+      "page": "#F0F7F5",
+      "default": "#FFFFFF",
+      "raised": "#FFFFFF",
+      "sunken": "#F5F7F6",
+      "overlay": "rgba(0, 0, 0, 0.5)"
+    },
+    "ink": {
+      "default": "#1A1D23",
+      "secondary": "#4A5060",
+      "muted": "#697386",
+      "disabled": "#A3ABBA",
+      "on-accent": "#FFFFFF",
+      "on-dark": "#FFFFFF",
+      "link": "#0E7C6B"
+    },
+    "edge": {
+      "default": "#E3E8EE",
+      "strong": "#D3D8DF",
+      "focus": "#0E7C6B"
+    },
+    "status": {
+      "success": "#16A34A",
+      "success-light": "#F0FDF4",
+      "warning": "#D97706",
+      "warning-light": "#FFFBEB",
+      "error": "#DF1B41",
+      "error-light": "#FEF2F2",
+      "info": "#2563EB",
+      "info-light": "#EFF6FF"
+    },
+    "confidence": {
+      "high": "#16A34A",
+      "medium": "#D97706",
+      "low": "#DF1B41"
+    }
+  },
+
+  "typography": {
+    "fontFamily": {
+      "primary": "Plus Jakarta Sans, system-ui, -apple-system, sans-serif",
+      "mono": "JetBrains Mono, Menlo, Consolas, monospace"
+    },
+    "fontWeight": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    },
+    "fontSize": {
+      "display": "32px",
+      "h1": "24px",
+      "h2": "20px",
+      "h3": "16px",
+      "body": "14px",
+      "small": "13px",
+      "caption": "12px",
+      "micro": "11px"
+    },
+    "lineHeight": {
+      "display": "40px",
+      "h1": "32px",
+      "h2": "28px",
+      "h3": "24px",
+      "body": "20px",
+      "small": "18px",
+      "caption": "16px",
+      "micro": "14px"
+    },
+    "letterSpacing": {
+      "normal": "0",
+      "tight": "-0.01em",
+      "wide": "0.5px",
+      "uppercase": "0.05em"
+    }
+  },
+
+  "spacing": {
+    "unit": "4px",
+    "scale": {
+      "0": "0px",
+      "1": "4px",
+      "2": "8px",
+      "3": "12px",
+      "4": "16px",
+      "5": "20px",
+      "6": "24px",
+      "8": "32px",
+      "10": "40px",
+      "12": "48px",
+      "16": "64px",
+      "20": "80px",
+      "24": "96px"
+    }
+  },
+
+  "radius": {
+    "none": "0px",
+    "sm": "4px",
+    "md": "6px",
+    "lg": "8px",
+    "xl": "12px",
+    "full": "9999px"
+  },
+
+  "shadow": {
+    "none": "none",
+    "sm": "0 1px 2px rgba(0, 0, 0, 0.05)",
+    "md": "0 4px 6px rgba(0, 0, 0, 0.07)",
+    "lg": "0 10px 15px rgba(0, 0, 0, 0.1)",
+    "focus": "0 0 0 3px rgba(14, 124, 107, 0.15)"
+  },
+
+  "elevation": {
+    "note": "BelegPilot uses border-first design. Shadows are rare — used only for overlays, modals, and dropdowns. Cards use borders, not shadows.",
+    "level0": "none",
+    "level1": "border: 1px solid #E3E8EE",
+    "level2": "0 4px 6px rgba(0, 0, 0, 0.07)",
+    "level3": "0 10px 15px rgba(0, 0, 0, 0.1)"
+  },
+
+  "layout": {
+    "sidebar": {
+      "width": "220px",
+      "collapsedWidth": "64px"
+    },
+    "content": {
+      "maxWidth": "1200px"
+    },
+    "grid": {
+      "columns": 12,
+      "gutter": "24px",
+      "margin": "24px"
+    },
+    "breakpoints": {
+      "mobile": "375px",
+      "tablet": "768px",
+      "desktop": "1280px",
+      "wide": "1440px"
+    }
+  },
+
+  "animation": {
+    "duration": {
+      "fast": "100ms",
+      "normal": "200ms",
+      "slow": "300ms",
+      "entrance": "400ms"
+    },
+    "easing": {
+      "default": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "entrance": "cubic-bezier(0, 0, 0.2, 1)",
+      "exit": "cubic-bezier(0.4, 0, 1, 1)",
+      "bounce": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+    }
+  },
+
+  "components": {
+    "button": {
+      "height": "36px",
+      "paddingX": "16px",
+      "radius": "6px",
+      "fontSize": "14px",
+      "fontWeight": 500
+    },
+    "input": {
+      "height": "40px",
+      "paddingX": "12px",
+      "radius": "6px",
+      "fontSize": "14px",
+      "labelGap": "4px"
+    },
+    "card": {
+      "radius": "8px",
+      "padding": "20px",
+      "border": "1px solid #E3E8EE"
+    },
+    "table": {
+      "rowHeight": "48px",
+      "headerFontSize": "12px",
+      "headerFontWeight": 500,
+      "headerLetterSpacing": "0.5px",
+      "headerColor": "#697386"
+    },
+    "badge": {
+      "height": "22px",
+      "paddingX": "8px",
+      "radius": "9999px",
+      "fontSize": "12px",
+      "fontWeight": 500
+    },
+    "sidebar": {
+      "navItemHeight": "36px",
+      "navItemPaddingX": "12px",
+      "navItemFontSize": "14px",
+      "sectionLabelFontSize": "11px",
+      "sectionLabelWeight": 500,
+      "sectionLabelLetterSpacing": "0.05em",
+      "iconSize": "16px",
+      "iconGap": "8px"
+    },
+    "toast": {
+      "radius": "8px",
+      "padding": "16px",
+      "maxWidth": "360px"
+    }
+  },
+
+  "iconography": {
+    "family": "Lucide",
+    "defaultSize": "16px",
+    "strokeWidth": "1.5px",
+    "sizes": {
+      "sm": "14px",
+      "md": "16px",
+      "lg": "20px",
+      "xl": "24px"
+    }
+  }
+}
