@@ -92,9 +92,7 @@ function layout(body: string): string {
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="vertical-align:middle;padding-right:10px;">
-                    <div style="width:32px;height:32px;background:#1A1D23;border-radius:8px;text-align:center;line-height:32px;">
-                      <span style="font-size:20px;font-weight:700;color:#0E7C6B;">B</span>
-                    </div>
+                    <img src="https://belegpilot.predivo.ch/logo-email.png" alt="BelegPilot" width="32" height="32" style="display:block;border-radius:8px;" />
                   </td>
                   <td style="vertical-align:middle;">
                     <span style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.3px;">BelegPilot</span>
