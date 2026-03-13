@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
 
 jobs:
   deploy:
@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           local-dir: ./dist/assets/
-          server-dir: assets/
+          server-dir: belegpilot.predivo.ch/assets/
           dangerous-clean-slate: false
 
       # Step 2: Upload everything else (HTML, .htaccess, favicon)
@@ -43,7 +43,7 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           local-dir: ./dist/
-          server-dir: ./
+          server-dir: belegpilot.predivo.ch/
           exclude: |
             **/assets/**
 
@@ -55,5 +55,5 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           local-dir: ./dist/assets/
-          server-dir: assets/
+          server-dir: belegpilot.predivo.ch/assets/
           dangerous-clean-slate: true
