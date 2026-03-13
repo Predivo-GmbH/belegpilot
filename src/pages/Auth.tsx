@@ -1,22 +1,50 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Loader2, CheckCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/hooks/useAuth'
 import { usePageTitle } from '@/hooks/usePageTitle'
 
-type AuthMode = 'login' | 'signup' | 'forgot'
+type AuthMode = 'login' | 'signup' | 'forgot' | 'reset'
+
+const VALID_MODES: AuthMode[] = ['login', 'signup', 'forgot', 'reset']
+
+const PAGE_TITLES: Record<AuthMode, string> = {
+  login: 'Anmelden',
+  signup: 'Registrieren',
+  forgot: 'Passwort vergessen',
+  reset: 'Neues Passwort',
+}
 
 export default function Auth() {
-  usePageTitle('Anmelden')
   const navigate = useNavigate()
-  const [mode, setMode] = useState<AuthMode>('login')
+  const [searchParams] = useSearchParams()
+  const { user, loading: authLoading } = useAuth()
+
+  // Derive mode from URL, with override state for in-page navigation
+  const urlMode = searchParams.get('mode') as AuthMode | null
+  const [modeOverride, setModeOverride] = useState<AuthMode | null>(null)
+
+  // URL mode takes precedence, then override, then default 'login'
+  // For reset mode: if no session and auth is loaded, fall back to forgot
+  let mode: AuthMode = modeOverride ?? (urlMode && VALID_MODES.includes(urlMode) ? urlMode : 'login')
+  if (mode === 'reset' && !authLoading && !user) {
+    mode = 'forgot'
+  }
+
+  const setMode = (newMode: AuthMode) => setModeOverride(newMode)
+
+  usePageTitle(PAGE_TITLES[mode])
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [orgName, setOrgName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [resetDone, setResetDone] = useState(false)
 
   const resetMessages = () => { setError(null); setSuccess(null) }
 
@@ -27,7 +55,7 @@ export default function Auth() {
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      setError(error.message)
+      setError(friendlyError(error.message))
       setLoading(false)
     } else {
       navigate('/dashboard')
@@ -44,10 +72,11 @@ export default function Auth() {
       password,
       options: {
         data: { full_name: fullName, org_name: orgName },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     })
     if (error) {
-      setError(error.message)
+      setError(friendlyError(error.message))
     } else {
       setSuccess('Bestätigungs-E-Mail gesendet. Bitte prüfen Sie Ihren Posteingang.')
     }
@@ -60,12 +89,37 @@ export default function Auth() {
     resetMessages()
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth?mode=reset`,
+      redirectTo: `${window.location.origin}/auth/callback`,
     })
     if (error) {
-      setError(error.message)
+      setError(friendlyError(error.message))
     } else {
       setSuccess('Link zum Zurücksetzen gesendet. Bitte prüfen Sie Ihren Posteingang.')
+    }
+    setLoading(false)
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    resetMessages()
+
+    if (password.length < 8) {
+      setError('Passwort muss mindestens 8 Zeichen lang sein.')
+      setLoading(false)
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Passwörter stimmen nicht überein.')
+      setLoading(false)
+      return
+    }
+
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) {
+      setError(friendlyError(error.message))
+    } else {
+      setResetDone(true)
     }
     setLoading(false)
   }
@@ -186,8 +240,62 @@ export default function Auth() {
               </button>
             </form>
           )}
+
+          {/* Reset Password */}
+          {mode === 'reset' && !resetDone && (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Neues Passwort wählen</h1>
+                <p className="mt-1 text-sm text-ink-secondary">Geben Sie Ihr neues Passwort ein.</p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="reset-password" className="mb-1 block text-sm font-medium text-foreground">Neues Passwort</label>
+                  <input id="reset-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mindestens 8 Zeichen" required minLength={8} autoComplete="new-password" className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="reset-confirm" className="mb-1 block text-sm font-medium text-foreground">Passwort bestätigen</label>
+                  <input id="reset-confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Passwort wiederholen" required minLength={8} autoComplete="new-password" className={inputClass} />
+                </div>
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <button type="submit" disabled={loading} className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Passwort zurücksetzen'}
+              </button>
+            </form>
+          )}
+
+          {/* Reset Password — Success */}
+          {mode === 'reset' && resetDone && (
+            <div className="text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-status-success/10">
+                <CheckCircle className="h-7 w-7 text-status-success" />
+              </div>
+              <h1 className="mt-5 text-2xl font-bold text-foreground">Passwort aktualisiert</h1>
+              <p className="mt-2 text-sm text-ink-secondary">
+                Ihr Passwort wurde erfolgreich zurückgesetzt. Sie können sich jetzt mit Ihrem neuen Passwort anmelden.
+              </p>
+              <button
+                onClick={() => { setMode('login'); setResetDone(false); resetMessages(); setPassword(''); setConfirmPassword('') }}
+                className="mt-6 inline-flex h-10 items-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
+              >
+                Zur Anmeldung
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
+}
+
+/** Map common Supabase auth error messages to German user-friendly messages */
+function friendlyError(msg: string): string {
+  if (msg.includes('Invalid login credentials')) return 'Ungültige Anmeldedaten. Bitte überprüfen Sie E-Mail und Passwort.'
+  if (msg.includes('Email not confirmed')) return 'E-Mail noch nicht bestätigt. Bitte prüfen Sie Ihren Posteingang.'
+  if (msg.includes('User already registered')) return 'Ein Konto mit dieser E-Mail existiert bereits.'
+  if (msg.includes('Password should be at least')) return 'Passwort muss mindestens 8 Zeichen lang sein.'
+  if (msg.includes('rate limit')) return 'Zu viele Versuche. Bitte warten Sie einen Moment.'
+  if (msg.includes('same_password')) return 'Das neue Passwort muss sich vom aktuellen unterscheiden.'
+  return msg
 }
