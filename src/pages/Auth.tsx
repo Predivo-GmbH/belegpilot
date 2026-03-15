@@ -5,13 +5,15 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { usePageTitle } from '@/hooks/usePageTitle'
 
-type AuthMode = 'login' | 'signup' | 'forgot' | 'reset'
+type AuthMode = 'login' | 'signup' | 'verify' | 'profile' | 'forgot' | 'reset'
 
 const VALID_MODES: AuthMode[] = ['login', 'signup', 'forgot', 'reset']
 
 const PAGE_TITLES: Record<AuthMode, string> = {
   login: 'Anmelden',
   signup: 'Registrieren',
+  verify: 'Code eingeben',
+  profile: 'Profil vervollständigen',
   forgot: 'Passwort vergessen',
   reset: 'Neues Passwort',
 }
@@ -21,12 +23,9 @@ export default function Auth() {
   const [searchParams] = useSearchParams()
   const { user, loading: authLoading } = useAuth()
 
-  // Derive mode from URL, with override state for in-page navigation
   const urlMode = searchParams.get('mode') as AuthMode | null
   const [modeOverride, setModeOverride] = useState<AuthMode | null>(null)
 
-  // URL mode takes precedence, then override, then default 'login'
-  // For reset mode: if no session and auth is loaded, fall back to forgot
   let mode: AuthMode = modeOverride ?? (urlMode && VALID_MODES.includes(urlMode) ? urlMode : 'login')
   if (mode === 'reset' && !authLoading && !user) {
     mode = 'forgot'
@@ -41,6 +40,7 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [orgName, setOrgName] = useState('')
+  const [otpCode, setOtpCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -48,6 +48,7 @@ export default function Auth() {
 
   const resetMessages = () => { setError(null); setSuccess(null) }
 
+  // ── Login (email + password) ──────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -62,27 +63,86 @@ export default function Auth() {
     }
   }
 
-  const handleSignup = async (e: React.FormEvent) => {
+  // ── Signup step 1: send OTP ───────────────────────────────────────────────
+  const handleSignupSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     resetMessages()
 
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password,
-      options: {
-        data: { full_name: fullName, org_name: orgName },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { shouldCreateUser: true },
     })
     if (error) {
       setError(friendlyError(error.message))
     } else {
-      setSuccess('Bestätigungs-E-Mail gesendet. Bitte prüfen Sie Ihren Posteingang.')
+      setSuccess('Bestätigungscode wurde an Ihre E-Mail gesendet.')
+      setMode('verify')
     }
     setLoading(false)
   }
 
+  // ── Signup step 2: verify OTP ─────────────────────────────────────────────
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    resetMessages()
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token: otpCode,
+      type: 'email',
+    })
+    if (error) {
+      setError(friendlyError(error.message))
+      setLoading(false)
+      return
+    }
+
+    // Check if user already has a profile (returning user)
+    const isNewUser = !data.user?.user_metadata?.full_name
+    if (isNewUser) {
+      setMode('profile')
+    } else {
+      navigate('/dashboard')
+    }
+    setLoading(false)
+  }
+
+  // ── Signup step 3: complete profile ───────────────────────────────────────
+  const handleCompleteProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    resetMessages()
+
+    if (password.length < 8) {
+      setError('Passwort muss mindestens 8 Zeichen lang sein.')
+      setLoading(false)
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Passwörter stimmen nicht überein.')
+      setLoading(false)
+      return
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password,
+      data: { full_name: fullName, org_name: orgName },
+    })
+    if (error) {
+      setError(friendlyError(error.message))
+      setLoading(false)
+      return
+    }
+
+    // Send welcome email via edge function (best-effort)
+    supabase.functions.invoke('send-welcome', { method: 'POST' }).catch(() => {})
+
+    navigate('/dashboard')
+  }
+
+  // ── Forgot password ───────────────────────────────────────────────────────
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -99,6 +159,7 @@ export default function Auth() {
     setLoading(false)
   }
 
+  // ── Reset password ────────────────────────────────────────────────────────
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -182,40 +243,91 @@ export default function Auth() {
             </form>
           )}
 
-          {/* Signup */}
+          {/* Signup — Step 1: Email */}
           {mode === 'signup' && (
-            <form onSubmit={handleSignup} className="space-y-4">
+            <form onSubmit={handleSignupSendOtp} className="space-y-4">
               <div>
                 <h1 className="text-2xl font-bold text-foreground">Konto erstellen</h1>
                 <p className="mt-1 text-sm text-ink-secondary">30 Tage kostenlos — keine Kreditkarte nötig</p>
               </div>
-              <div className="space-y-3">
-                <div>
-                  <label htmlFor="signup-org" className="mb-1 block text-sm font-medium text-foreground">Firmenname</label>
-                  <input id="signup-org" type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="Meier Treuhand AG" required maxLength={100} className={inputClass} />
-                </div>
-                <div>
-                  <label htmlFor="signup-name" className="mb-1 block text-sm font-medium text-foreground">Vollständiger Name</label>
-                  <input id="signup-name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Sandra Meier" required maxLength={100} className={inputClass} />
-                </div>
-                <div>
-                  <label htmlFor="signup-email" className="mb-1 block text-sm font-medium text-foreground">E-Mail</label>
-                  <input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@treuhand.ch" required className={inputClass} />
-                </div>
-                <div>
-                  <label htmlFor="signup-password" className="mb-1 block text-sm font-medium text-foreground">Passwort</label>
-                  <input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mindestens 8 Zeichen" required minLength={8} maxLength={128} autoComplete="new-password" className={inputClass} />
-                </div>
+              <div>
+                <label htmlFor="signup-email" className="mb-1 block text-sm font-medium text-foreground">E-Mail</label>
+                <input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@treuhand.ch" required className={inputClass} />
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               {success && <p className="text-sm text-status-success">{success}</p>}
               <button type="submit" disabled={loading} className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Konto erstellen'}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Bestätigungscode senden'}
               </button>
               <p className="text-center text-sm text-ink-secondary">
                 Bereits ein Konto?{' '}
                 <button type="button" onClick={() => { setMode('login'); resetMessages() }} className="font-medium text-primary hover:underline">Anmelden</button>
               </p>
+            </form>
+          )}
+
+          {/* Signup — Step 2: Verify OTP */}
+          {mode === 'verify' && (
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Code eingeben</h1>
+                <p className="mt-1 text-sm text-ink-secondary">Wir haben einen 6-stelligen Code an <strong>{email}</strong> gesendet.</p>
+              </div>
+              <div>
+                <label htmlFor="otp-code" className="mb-1 block text-sm font-medium text-foreground">Bestätigungscode</label>
+                <input
+                  id="otp-code"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="000000"
+                  required
+                  autoFocus
+                  className={`${inputClass} text-center text-lg tracking-[0.3em]`}
+                />
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <button type="submit" disabled={loading || otpCode.length !== 6} className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Bestätigen'}
+              </button>
+              <button type="button" onClick={() => { setMode('signup'); setOtpCode(''); resetMessages() }} className="flex w-full items-center justify-center text-sm font-medium text-primary hover:underline">
+                ← Andere E-Mail verwenden
+              </button>
+            </form>
+          )}
+
+          {/* Signup — Step 3: Complete Profile */}
+          {mode === 'profile' && (
+            <form onSubmit={handleCompleteProfile} className="space-y-4">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Profil vervollständigen</h1>
+                <p className="mt-1 text-sm text-ink-secondary">Noch ein paar Angaben, dann geht's los.</p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="profile-org" className="mb-1 block text-sm font-medium text-foreground">Firmenname</label>
+                  <input id="profile-org" type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="Meier Treuhand AG" required maxLength={100} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="profile-name" className="mb-1 block text-sm font-medium text-foreground">Vollständiger Name</label>
+                  <input id="profile-name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Sandra Meier" required maxLength={100} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="profile-password" className="mb-1 block text-sm font-medium text-foreground">Passwort</label>
+                  <input id="profile-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mindestens 8 Zeichen" required minLength={8} maxLength={128} autoComplete="new-password" className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="profile-confirm" className="mb-1 block text-sm font-medium text-foreground">Passwort bestätigen</label>
+                  <input id="profile-confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Passwort wiederholen" required minLength={8} autoComplete="new-password" className={inputClass} />
+                </div>
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <button type="submit" disabled={loading} className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Konto erstellen'}
+              </button>
             </form>
           )}
 
@@ -297,5 +409,7 @@ function friendlyError(msg: string): string {
   if (msg.includes('Password should be at least')) return 'Passwort muss mindestens 8 Zeichen lang sein.'
   if (msg.includes('rate limit')) return 'Zu viele Versuche. Bitte warten Sie einen Moment.'
   if (msg.includes('same_password')) return 'Das neue Passwort muss sich vom aktuellen unterscheiden.'
+  if (msg.includes('Token has expired')) return 'Der Code ist abgelaufen. Bitte fordern Sie einen neuen an.'
+  if (msg.includes('invalid')) return 'Ungültiger Code. Bitte überprüfen Sie Ihre Eingabe.'
   return msg
 }
