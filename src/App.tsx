@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { Suspense, lazy } from 'react'
-import { PasswordGate } from '@/components/shared/PasswordGate'
 import { ProtectedRoute } from '@/components/shared/ProtectedRoute'
 
 const Landing = lazy(() => import('@/pages/Landing'))
@@ -68,17 +67,9 @@ function AppRouter() {
 }
 
 export function App() {
-  const gatePassword = import.meta.env.VITE_PASSWORD_GATE
-
   return (
     <QueryClientProvider client={queryClient}>
-      {gatePassword ? (
-        <PasswordGate password={gatePassword}>
-          <AppRouter />
-        </PasswordGate>
-      ) : (
-        <AppRouter />
-      )}
+      <AppRouter />
       <Toaster position="top-right" richColors closeButton />
     </QueryClientProvider>
   )
