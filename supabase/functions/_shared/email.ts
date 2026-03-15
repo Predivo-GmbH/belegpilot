@@ -142,7 +142,7 @@ function button(text: string, href: string): string {
 
 // ─── Templates ───────────────────────────────────────────────────────────────
 
-/** Welcome email — sent after signup confirmation */
+/** Welcome email — sent after profile completion */
 export function welcomeEmail(userName: string): { subject: string; html: string } {
   const firstName = userName.split(' ')[0]
   return {
@@ -168,58 +168,141 @@ export function welcomeEmail(userName: string): { subject: string; html: string 
   }
 }
 
-/** Email confirmation — sent when user signs up */
-export function confirmationEmail(userName: string, confirmUrl: string): { subject: string; html: string } {
+/** Trial ending soon — sent 3 days before trial expiry */
+export function trialEndingEmail(
+  userName: string,
+  daysLeft: number,
+): { subject: string; html: string } {
   const firstName = userName.split(' ')[0]
+
   return {
-    subject: 'Bestätigen Sie Ihre E-Mail-Adresse — BelegPilot',
+    subject: `Ihr BelegPilot-Testzeitraum endet in ${daysLeft} Tag${daysLeft === 1 ? '' : 'en'}`,
     html: layout(`
-      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#1A1D23;">E-Mail bestätigen</h1>
+      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#1A1D23;">Ihr Testzeitraum endet bald, ${firstName}</h1>
       <p style="margin:0 0 12px;font-size:15px;color:#3f3f46;line-height:1.6;">
-        Hallo ${firstName}, bitte bestätigen Sie Ihre E-Mail-Adresse, um Ihr BelegPilot-Konto zu aktivieren.
+        Ihr kostenloser Testzeitraum läuft in <strong>${daysLeft} Tag${daysLeft === 1 ? '' : 'en'}</strong> ab.
+        Upgraden Sie jetzt, um Ihre Belege weiterhin mit KI-gestützter Extraktion zu verarbeiten.
       </p>
-      ${button('E-Mail bestätigen', confirmUrl)}
+      <p style="margin:0 0 12px;font-size:15px;color:#3f3f46;line-height:1.6;">
+        Pläne ab <strong>CHF 29/Monat</strong> — Jahrespläne sparen Ihnen ca. 2 Monate.
+      </p>
+      ${button('Plan wählen', `${APP_URL}/pricing`)}
       <p style="margin:0;font-size:13px;color:#71717a;">
-        Falls Sie kein Konto erstellt haben, können Sie diese E-Mail ignorieren.
+        Noch nicht bereit? Kein Problem — Ihre Daten bleiben gespeichert und Sie können jederzeit upgraden.
       </p>
     `),
   }
 }
 
-/** Password reset — sent when user requests a password reset */
-export function passwordResetEmail(userName: string, resetUrl: string): { subject: string; html: string } {
+/** Payment failed — sent when Stripe reports a failed charge */
+export function paymentFailedEmail(
+  userName: string,
+): { subject: string; html: string } {
   const firstName = userName.split(' ')[0]
+
   return {
-    subject: 'Passwort zurücksetzen — BelegPilot',
+    subject: 'Handlung erforderlich: Zahlung fehlgeschlagen — BelegPilot',
     html: layout(`
-      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#1A1D23;">Passwort zurücksetzen</h1>
+      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#1A1D23;">Zahlungsproblem, ${firstName}</h1>
       <p style="margin:0 0 12px;font-size:15px;color:#3f3f46;line-height:1.6;">
-        Hallo ${firstName}, Sie haben angefordert, Ihr Passwort zurückzusetzen. Klicken Sie auf den Button unten, um ein neues Passwort zu wählen.
+        Wir konnten Ihre letzte Zahlung für BelegPilot nicht verarbeiten. Dies liegt häufig an einer abgelaufenen Karte oder unzureichendem Guthaben.
       </p>
-      ${button('Neues Passwort wählen', resetUrl)}
-      <p style="margin:0 0 12px;font-size:13px;color:#71717a;">
-        Dieser Link ist 1 Stunde gültig.
+      <p style="margin:0 0 12px;font-size:15px;color:#3f3f46;line-height:1.6;">
+        Bitte aktualisieren Sie Ihre Zahlungsmethode, um Ihr Konto aktiv zu halten.
       </p>
+      ${button('Zahlungsmethode aktualisieren', `${APP_URL}/settings`)}
       <p style="margin:0;font-size:13px;color:#71717a;">
-        Falls Sie kein Zurücksetzen angefordert haben, können Sie diese E-Mail ignorieren.
+        Falls Sie glauben, dass dies ein Fehler ist, antworten Sie einfach auf diese E-Mail.
       </p>
     `),
   }
 }
 
-/** Magic link login — sent for passwordless auth */
-export function magicLinkEmail(email: string, magicUrl: string): { subject: string; html: string } {
+/** Plan changed — sent after a subscription upgrade/downgrade */
+export function planChangedEmail(
+  userName: string,
+  newPlan: string,
+  isUpgrade: boolean,
+): { subject: string; html: string } {
+  const firstName = userName.split(' ')[0]
+  const planDisplay = newPlan.charAt(0).toUpperCase() + newPlan.slice(1)
+  const verb = isUpgrade ? 'geupgradet' : 'geändert'
+
   return {
-    subject: 'Ihr Anmeldelink — BelegPilot',
+    subject: `Ihr BelegPilot-Plan wurde auf ${planDisplay} ${verb}`,
     html: layout(`
-      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#1A1D23;">Anmeldelink</h1>
+      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#1A1D23;">Plan ${verb}, ${firstName}</h1>
       <p style="margin:0 0 12px;font-size:15px;color:#3f3f46;line-height:1.6;">
-        Klicken Sie auf den Button unten, um sich bei BelegPilot anzumelden.
+        Ihr BelegPilot-Abonnement wurde auf den <strong>${planDisplay}</strong>-Plan ${verb}.
+        ${isUpgrade ? 'Ihre neuen Limits sind sofort aktiv.' : 'Die Änderung tritt am Ende Ihres aktuellen Abrechnungszeitraums in Kraft.'}
       </p>
-      ${button('Jetzt anmelden', magicUrl)}
+      ${button('Konto anzeigen', `${APP_URL}/settings`)}
+    `),
+  }
+}
+
+/** Account deleted confirmation — nDSG compliance */
+export function accountDeletedEmail(
+  userName: string,
+): { subject: string; html: string } {
+  const firstName = userName.split(' ')[0]
+
+  return {
+    subject: 'Ihr BelegPilot-Konto wurde gelöscht',
+    html: layout(`
+      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#1A1D23;">Konto gelöscht, ${firstName}</h1>
+      <p style="margin:0 0 12px;font-size:15px;color:#3f3f46;line-height:1.6;">
+        Ihr BelegPilot-Konto und alle zugehörigen Daten wurden wie gewünscht unwiderruflich gelöscht.
+      </p>
+      <p style="margin:0 0 12px;font-size:15px;color:#3f3f46;line-height:1.6;">
+        Falls dies ein Versehen war oder Sie zurückkehren möchten, können Sie sich jederzeit neu registrieren.
+      </p>
       <p style="margin:0;font-size:13px;color:#71717a;">
-        Dieser Link ist 1 Stunde gültig. Falls Sie keine Anmeldung angefordert haben, können Sie diese E-Mail ignorieren.
+        Es tut uns leid, Sie gehen zu sehen. Haben Sie Feedback? Antworten Sie auf diese E-Mail — wir freuen uns über Ihre Rückmeldung.
       </p>
+    `),
+  }
+}
+
+/** Usage alert — sent at 80% and 100% document quota */
+export function usageAlertEmail(
+  userName: string,
+  orgName: string,
+  currentUsage: number,
+  limit: number,
+  percentage: number,
+): { subject: string; html: string } {
+  const firstName = userName.split(' ')[0]
+  const isAtLimit = percentage >= 100
+
+  return {
+    subject: isAtLimit
+      ? `Dokumentenlimit erreicht — BelegPilot`
+      : `${percentage}% Ihres Dokumentenlimits erreicht — BelegPilot`,
+    html: layout(`
+      <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#1A1D23;">${isAtLimit ? 'Dokumentenlimit erreicht' : 'Nutzungswarnung'}, ${firstName}</h1>
+      <p style="margin:0 0 16px;font-size:15px;color:#3f3f46;line-height:1.6;">
+        ${isAtLimit
+          ? `<strong>${orgName}</strong> hat das monatliche Dokumentenlimit von <strong>${limit} Belegen</strong> erreicht. Neue Uploads werden bis zum nächsten Abrechnungszeitraum pausiert.`
+          : `<strong>${orgName}</strong> hat <strong>${currentUsage} von ${limit}</strong> Belegen (${percentage}%) diesen Monat verarbeitet.`
+        }
+      </p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+        <tr>
+          <td width="50%" style="padding:12px;background:#fafafa;border-radius:6px 0 0 6px;border:1px solid #e4e4e7;border-right:none;text-align:center;">
+            <p style="margin:0;font-size:24px;font-weight:700;color:#1A1D23;">${currentUsage}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:#71717a;text-transform:uppercase;letter-spacing:0.5px;">Verarbeitet</p>
+          </td>
+          <td width="50%" style="padding:12px;background:#fafafa;border-radius:0 6px 6px 0;border:1px solid #e4e4e7;text-align:center;">
+            <p style="margin:0;font-size:24px;font-weight:700;color:${isAtLimit ? '#E9A23B' : '#0E7C6B'};">${limit}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:#71717a;text-transform:uppercase;letter-spacing:0.5px;">Limit</p>
+          </td>
+        </tr>
+      </table>
+      ${isAtLimit
+        ? button('Plan upgraden', `${APP_URL}/pricing`)
+        : button('Nutzung anzeigen', `${APP_URL}/dashboard`)
+      }
     `),
   }
 }

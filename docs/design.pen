@@ -12907,7 +12907,13 @@
               "height": "fit_content",
               "name": "logoRef",
               "x": 285,
-              "y": 313
+              "y": 313,
+              "descendants": {
+                "VEPou": {
+                  "x": 44,
+                  "y": 2
+                }
+              }
             },
             {
               "type": "text",
@@ -13134,15 +13140,19 @@
                       "name": "emailInput",
                       "x": 0,
                       "y": 0,
+                      "height": "fit_content",
                       "descendants": {
                         "KOjVO": {
                           "content": "E-Mail"
                         },
                         "m8SdQ": {
-                          "width": "fill_container"
+                          "width": "fill_container",
+                          "y": 22
                         },
                         "Bcdlv": {
-                          "content": "name@treuhand.ch"
+                          "content": "name@treuhand.ch",
+                          "x": 12,
+                          "y": 11
                         }
                       }
                     },
@@ -13154,15 +13164,19 @@
                       "name": "nameInput",
                       "x": 0,
                       "y": 78,
+                      "height": "fit_content",
                       "descendants": {
                         "KOjVO": {
                           "content": "Vollständiger Name"
                         },
                         "m8SdQ": {
-                          "width": "fill_container"
+                          "width": "fill_container",
+                          "y": 22
                         },
                         "Bcdlv": {
-                          "content": "Sandra Müller"
+                          "content": "Sandra Müller",
+                          "x": 12,
+                          "y": 11
                         }
                       }
                     }
@@ -13289,15 +13303,19 @@
               "name": "emailInput",
               "x": 32,
               "y": 136,
+              "height": "fit_content",
               "descendants": {
                 "KOjVO": {
                   "content": "E-Mail"
                 },
                 "m8SdQ": {
-                  "width": "fill_container"
+                  "width": "fill_container",
+                  "y": 22
                 },
                 "Bcdlv": {
-                  "content": "name@treuhand.ch"
+                  "content": "name@treuhand.ch",
+                  "x": 12,
+                  "y": 11
                 }
               }
             },
@@ -14017,9 +14035,12 @@
                   "name": "browseBtn",
                   "x": 491,
                   "y": 202,
+                  "width": "fit_content",
                   "descendants": {
                     "23LQ7": {
-                      "content": "Dateien auswählen"
+                      "content": "Dateien auswählen",
+                      "x": 16,
+                      "y": 9
                     }
                   }
                 }
@@ -14101,9 +14122,17 @@
                           "name": "r1badge",
                           "x": 269,
                           "y": 12,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "8rr2c": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "l8P98": {
-                              "content": "Verarbeitet"
+                              "content": "Verarbeitet",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         }
@@ -14154,9 +14183,17 @@
                           "name": "r2badge",
                           "x": 218,
                           "y": 12,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "DB1Jl": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "PEKND": {
-                              "content": "In Prüfung"
+                              "content": "In Prüfung",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         }
@@ -14201,9 +14238,17 @@
                           "name": "r3badge",
                           "x": 190,
                           "y": 12,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "8rr2c": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "l8P98": {
-                              "content": "Verarbeitet"
+                              "content": "Verarbeitet",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         }
@@ -14676,7 +14721,9 @@
                   "y": 8,
                   "descendants": {
                     "baORO": {
-                      "content": "Mandant hinzufügen"
+                      "content": "Mandant hinzufügen",
+                      "x": 16,
+                      "y": 9
                     }
                   }
                 }
@@ -14689,7 +14736,17 @@
               "width": "fill_container",
               "name": "searchRow",
               "x": 40,
-              "y": 108
+              "y": 108,
+              "descendants": {
+                "wZNkO": {
+                  "x": 12,
+                  "y": 12
+                },
+                "sjBWX": {
+                  "x": 36,
+                  "y": 11
+                }
+              }
             },
             {
               "type": "frame",
@@ -14823,9 +14880,16 @@
                       "name": "r1s",
                       "x": 104,
                       "y": 14,
+                      "height": "fit_content",
                       "descendants": {
+                        "8rr2c": {
+                          "x": 10,
+                          "y": 7.5
+                        },
                         "l8P98": {
-                          "content": "Aktiv"
+                          "content": "Aktiv",
+                          "x": 24,
+                          "y": 4
                         }
                       }
                     },
@@ -14896,9 +14960,16 @@
                       "name": "r2s",
                       "x": 155,
                       "y": 14,
+                      "height": "fit_content",
                       "descendants": {
+                        "8rr2c": {
+                          "x": 10,
+                          "y": 7.5
+                        },
                         "l8P98": {
-                          "content": "Aktiv"
+                          "content": "Aktiv",
+                          "x": 24,
+                          "y": 4
                         }
                       }
                     },
@@ -14969,9 +15040,16 @@
                       "name": "r3s",
                       "x": 113,
                       "y": 14,
+                      "height": "fit_content",
                       "descendants": {
+                        "8rr2c": {
+                          "x": 10,
+                          "y": 7.5
+                        },
                         "l8P98": {
-                          "content": "Aktiv"
+                          "content": "Aktiv",
+                          "x": 24,
+                          "y": 4
                         }
                       }
                     },
@@ -15042,9 +15120,16 @@
                       "name": "r4s",
                       "x": 114,
                       "y": 14,
+                      "height": "fit_content",
                       "descendants": {
+                        "DB1Jl": {
+                          "x": 10,
+                          "y": 7.5
+                        },
                         "PEKND": {
-                          "content": "Inaktiv"
+                          "content": "Inaktiv",
+                          "x": 24,
+                          "y": 4
                         }
                       }
                     },
@@ -15109,9 +15194,16 @@
                       "name": "r5s",
                       "x": 114,
                       "y": 14,
+                      "height": "fit_content",
                       "descendants": {
+                        "8rr2c": {
+                          "x": 10,
+                          "y": 7.5
+                        },
                         "l8P98": {
-                          "content": "Aktiv"
+                          "content": "Aktiv",
+                          "x": 24,
+                          "y": 4
                         }
                       }
                     },
@@ -15626,9 +15718,12 @@
                       "name": "editBtn",
                       "x": 0,
                       "y": 0,
+                      "width": "fit_content",
                       "descendants": {
                         "23LQ7": {
-                          "content": "Bearbeiten"
+                          "content": "Bearbeiten",
+                          "x": 16,
+                          "y": 9
                         }
                       }
                     },
@@ -15640,9 +15735,12 @@
                       "name": "exportBtn",
                       "x": 115,
                       "y": 0,
+                      "width": "fit_content",
                       "descendants": {
                         "baORO": {
-                          "content": "Exportieren"
+                          "content": "Exportieren",
+                          "x": 16,
+                          "y": 9
                         }
                       }
                     }
@@ -16025,9 +16123,17 @@
                           "name": "dr1s",
                           "x": 276,
                           "y": 12,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "8rr2c": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "l8P98": {
-                              "content": "Verifiziert"
+                              "content": "Verifiziert",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         },
@@ -16087,9 +16193,17 @@
                           "name": "dr2s",
                           "x": 233,
                           "y": 12,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "DB1Jl": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "PEKND": {
-                              "content": "Prüfung"
+                              "content": "Prüfung",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         },
@@ -16143,9 +16257,17 @@
                           "name": "dr3s",
                           "x": 252,
                           "y": 12,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "8rr2c": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "l8P98": {
-                              "content": "Verifiziert"
+                              "content": "Verifiziert",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         },
@@ -16626,9 +16748,12 @@
                   "name": "expBtn",
                   "x": 1013,
                   "y": 8,
+                  "width": "fit_content",
                   "descendants": {
                     "baORO": {
-                      "content": "Export starten"
+                      "content": "Export starten",
+                      "x": 16,
+                      "y": 9
                     }
                   }
                 }
@@ -16674,19 +16799,24 @@
                       "name": "clientSel",
                       "x": 0,
                       "y": 0,
+                      "height": "fit_content",
                       "descendants": {
                         "3LJvO": {
                           "content": "Mandant"
                         },
                         "ppzVd": {
-                          "width": "fill_container"
+                          "width": "fill_container",
+                          "y": 22
                         },
                         "e6UB7": {
                           "width": "fill_container",
-                          "content": "Alle Mandanten"
+                          "content": "Alle Mandanten",
+                          "x": 12,
+                          "y": 11
                         },
                         "QumBq": {
-                          "x": 322.6666666666667
+                          "x": 322.6666666666667,
+                          "y": 12
                         }
                       }
                     },
@@ -16698,19 +16828,24 @@
                       "name": "formatSel",
                       "x": 370.6666666666667,
                       "y": 0,
+                      "height": "fit_content",
                       "descendants": {
                         "3LJvO": {
                           "content": "Format"
                         },
                         "ppzVd": {
-                          "width": "fill_container"
+                          "width": "fill_container",
+                          "y": 22
                         },
                         "e6UB7": {
                           "width": "fill_container",
-                          "content": "CSV (Abacus)"
+                          "content": "CSV (Abacus)",
+                          "x": 12,
+                          "y": 11
                         },
                         "QumBq": {
-                          "x": 322.6666666666667
+                          "x": 322.6666666666667,
+                          "y": 12
                         }
                       }
                     },
@@ -16722,19 +16857,24 @@
                       "name": "dateSel",
                       "x": 741.3333333333334,
                       "y": 0,
+                      "height": "fit_content",
                       "descendants": {
                         "3LJvO": {
                           "content": "Zeitraum"
                         },
                         "ppzVd": {
-                          "width": "fill_container"
+                          "width": "fill_container",
+                          "y": 22
                         },
                         "e6UB7": {
                           "width": "fill_container",
-                          "content": "März 2026"
+                          "content": "März 2026",
+                          "x": 12,
+                          "y": 11
                         },
                         "QumBq": {
-                          "x": 322.6666666666667
+                          "x": 322.6666666666667,
+                          "y": 12
                         }
                       }
                     }
@@ -17587,15 +17727,19 @@
                   "name": "f1",
                   "x": 24,
                   "y": 67,
+                  "height": "fit_content",
                   "descendants": {
                     "KOjVO": {
                       "content": "Firmenname"
                     },
                     "m8SdQ": {
-                      "width": "fill_container"
+                      "width": "fill_container",
+                      "y": 22
                     },
                     "Bcdlv": {
-                      "content": "Treuhand Muster AG"
+                      "content": "Treuhand Muster AG",
+                      "x": 12,
+                      "y": 11
                     }
                   }
                 },
@@ -17607,15 +17751,19 @@
                   "name": "f2",
                   "x": 24,
                   "y": 149,
+                  "height": "fit_content",
                   "descendants": {
                     "KOjVO": {
                       "content": "Strasse und Hausnummer"
                     },
                     "m8SdQ": {
-                      "width": "fill_container"
+                      "width": "fill_container",
+                      "y": 22
                     },
                     "Bcdlv": {
-                      "content": "Bahnhofstrasse 42"
+                      "content": "Bahnhofstrasse 42",
+                      "x": 12,
+                      "y": 11
                     }
                   }
                 },
@@ -17634,15 +17782,19 @@
                       "name": "f3",
                       "x": 0,
                       "y": 0,
+                      "height": "fit_content",
                       "descendants": {
                         "KOjVO": {
                           "content": "PLZ"
                         },
                         "m8SdQ": {
-                          "width": "fill_container"
+                          "width": "fill_container",
+                          "y": 22
                         },
                         "Bcdlv": {
-                          "content": "8001"
+                          "content": "8001",
+                          "x": 12,
+                          "y": 11
                         }
                       }
                     },
@@ -17654,15 +17806,19 @@
                       "name": "f4",
                       "x": 284,
                       "y": 0,
+                      "height": "fit_content",
                       "descendants": {
                         "KOjVO": {
                           "content": "Ort"
                         },
                         "m8SdQ": {
-                          "width": "fill_container"
+                          "width": "fill_container",
+                          "y": 22
                         },
                         "Bcdlv": {
-                          "content": "Zürich"
+                          "content": "Zürich",
+                          "x": 12,
+                          "y": 11
                         }
                       }
                     }
@@ -17676,15 +17832,19 @@
                   "name": "f5",
                   "x": 24,
                   "y": 313,
+                  "height": "fit_content",
                   "descendants": {
                     "KOjVO": {
                       "content": "Telefon"
                     },
                     "m8SdQ": {
-                      "width": "fill_container"
+                      "width": "fill_container",
+                      "y": 22
                     },
                     "Bcdlv": {
-                      "content": "+41 44 123 45 67"
+                      "content": "+41 44 123 45 67",
+                      "x": 12,
+                      "y": 11
                     }
                   }
                 },
@@ -17696,15 +17856,19 @@
                   "name": "f6",
                   "x": 24,
                   "y": 395,
+                  "height": "fit_content",
                   "descendants": {
                     "KOjVO": {
                       "content": "E-Mail"
                     },
                     "m8SdQ": {
-                      "width": "fill_container"
+                      "width": "fill_container",
+                      "y": 22
                     },
                     "Bcdlv": {
-                      "content": "info@treuhand-muster.ch"
+                      "content": "info@treuhand-muster.ch",
+                      "x": 12,
+                      "y": 11
                     }
                   }
                 },
@@ -17719,7 +17883,9 @@
                   "y": 477,
                   "descendants": {
                     "baORO": {
-                      "content": "Änderungen speichern"
+                      "content": "Änderungen speichern",
+                      "x": 16,
+                      "y": 9
                     }
                   }
                 }
@@ -18336,9 +18502,12 @@
                       "name": "inviteBtn",
                       "x": 610,
                       "y": 0,
+                      "width": "fit_content",
                       "descendants": {
                         "baORO": {
-                          "content": "Einladen"
+                          "content": "Einladen",
+                          "x": 16,
+                          "y": 9
                         }
                       }
                     }
@@ -18453,9 +18622,17 @@
                           "name": "tr1r",
                           "x": 284,
                           "y": 14,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "Ut3rG": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "zffFz": {
-                              "content": "Admin"
+                              "content": "Admin",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         }
@@ -18499,9 +18676,17 @@
                           "name": "tr2r",
                           "x": 263,
                           "y": 14,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "Ut3rG": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "zffFz": {
-                              "content": "Buchhalter"
+                              "content": "Buchhalter",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         }
@@ -19228,9 +19413,17 @@
                           "name": "er1s",
                           "x": 95,
                           "y": 14,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "8rr2c": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "l8P98": {
-                              "content": "Aktiv"
+                              "content": "Aktiv",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         }
@@ -19280,9 +19473,17 @@
                           "name": "er2s",
                           "x": 75,
                           "y": 14,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "8rr2c": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "l8P98": {
-                              "content": "Aktiv"
+                              "content": "Aktiv",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         }
@@ -19326,9 +19527,17 @@
                           "name": "er3s",
                           "x": 108,
                           "y": 14,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "Ut3rG": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "zffFz": {
-                              "content": "Inaktiv"
+                              "content": "Inaktiv",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         }
@@ -19963,9 +20172,17 @@
                           "name": "planBadge",
                           "x": 546,
                           "y": 0,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "8rr2c": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "l8P98": {
-                              "content": "Professional"
+                              "content": "Professional",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         }
@@ -20746,15 +20963,19 @@
                       "name": "f1",
                       "x": 24,
                       "y": 67,
+                      "height": "fit_content",
                       "descendants": {
                         "KOjVO": {
                           "content": "Aktuelles Passwort"
                         },
                         "m8SdQ": {
-                          "width": "fill_container"
+                          "width": "fill_container",
+                          "y": 22
                         },
                         "Bcdlv": {
-                          "content": "••••••••"
+                          "content": "••••••••",
+                          "x": 12,
+                          "y": 11
                         }
                       }
                     },
@@ -20766,15 +20987,19 @@
                       "name": "f2",
                       "x": 24,
                       "y": 149,
+                      "height": "fit_content",
                       "descendants": {
                         "KOjVO": {
                           "content": "Neues Passwort"
                         },
                         "m8SdQ": {
-                          "width": "fill_container"
+                          "width": "fill_container",
+                          "y": 22
                         },
                         "Bcdlv": {
-                          "content": "••••••••"
+                          "content": "••••••••",
+                          "x": 12,
+                          "y": 11
                         }
                       }
                     },
@@ -20786,15 +21011,19 @@
                       "name": "f3",
                       "x": 24,
                       "y": 231,
+                      "height": "fit_content",
                       "descendants": {
                         "KOjVO": {
                           "content": "Passwort bestätigen"
                         },
                         "m8SdQ": {
-                          "width": "fill_container"
+                          "width": "fill_container",
+                          "y": 22
                         },
                         "Bcdlv": {
-                          "content": "••••••••"
+                          "content": "••••••••",
+                          "x": 12,
+                          "y": 11
                         }
                       }
                     },
@@ -20809,7 +21038,9 @@
                       "y": 313,
                       "descendants": {
                         "baORO": {
-                          "content": "Passwort ändern"
+                          "content": "Passwort ändern",
+                          "x": 16,
+                          "y": 9
                         }
                       }
                     }
@@ -20855,9 +21086,17 @@
                           "name": "tfaBadge",
                           "x": 480,
                           "y": 0,
+                          "width": "fit_content",
+                          "height": "fit_content",
                           "descendants": {
+                            "Ut3rG": {
+                              "x": 10,
+                              "y": 7.5
+                            },
                             "zffFz": {
-                              "content": "Inaktiv"
+                              "content": "Inaktiv",
+                              "x": 24,
+                              "y": 4
                             }
                           }
                         }
@@ -20887,7 +21126,9 @@
                       "y": 142,
                       "descendants": {
                         "23LQ7": {
-                          "content": "2FA aktivieren (bald verfügbar)"
+                          "content": "2FA aktivieren (bald verfügbar)",
+                          "x": 16,
+                          "y": 9
                         }
                       }
                     }
@@ -20931,7 +21172,13 @@
               "height": "fit_content",
               "name": "mLogo",
               "x": 112.5,
-              "y": 38
+              "y": 38,
+              "descendants": {
+                "VEPou": {
+                  "x": 44,
+                  "y": 2
+                }
+              }
             },
             {
               "type": "text",
@@ -20998,15 +21245,19 @@
                   "name": "mEmail",
                   "x": 0,
                   "y": 86,
+                  "height": "fit_content",
                   "descendants": {
                     "KOjVO": {
                       "content": "E-Mail"
                     },
                     "m8SdQ": {
-                      "width": "fill_container"
+                      "width": "fill_container",
+                      "y": 22
                     },
                     "Bcdlv": {
-                      "content": "name@treuhand.ch"
+                      "content": "name@treuhand.ch",
+                      "x": 12,
+                      "y": 11
                     }
                   }
                 },
@@ -21018,15 +21269,19 @@
                   "name": "mPw",
                   "x": 0,
                   "y": 168,
+                  "height": "fit_content",
                   "descendants": {
                     "KOjVO": {
                       "content": "Passwort"
                     },
                     "m8SdQ": {
-                      "width": "fill_container"
+                      "width": "fill_container",
+                      "y": 22
                     },
                     "Bcdlv": {
-                      "content": "••••••••"
+                      "content": "••••••••",
+                      "x": 12,
+                      "y": 11
                     }
                   }
                 },
@@ -21328,10 +21583,12 @@
                   "name": "tUpBtn",
                   "x": 558,
                   "y": 0,
+                  "width": "fit_content",
                   "descendants": {
                     "baORO": {
                       "y": 8,
-                      "content": "Hochladen"
+                      "content": "Hochladen",
+                      "x": 16
                     }
                   }
                 }
@@ -21352,15 +21609,22 @@
                   "name": "mc1",
                   "x": 0,
                   "y": 0,
+                  "height": "fit_content",
                   "descendants": {
                     "ViwAP": {
-                      "content": "DOCUMENTS TODAY"
+                      "content": "DOCUMENTS TODAY",
+                      "x": 20,
+                      "y": 20
                     },
                     "vcuIT": {
-                      "content": "34"
+                      "content": "34",
+                      "x": 20,
+                      "y": 42
                     },
                     "Obotd": {
-                      "content": "+12% vs letzte Woche"
+                      "content": "+12% vs letzte Woche",
+                      "x": 20,
+                      "y": 92
                     }
                   }
                 },
@@ -21372,15 +21636,22 @@
                   "name": "mc2",
                   "x": 338,
                   "y": 0,
+                  "height": "fit_content",
                   "descendants": {
                     "ViwAP": {
-                      "content": "PENDING REVIEW"
+                      "content": "PENDING REVIEW",
+                      "x": 20,
+                      "y": 20
                     },
                     "vcuIT": {
-                      "content": "7"
+                      "content": "7",
+                      "x": 20,
+                      "y": 42
                     },
                     "Obotd": {
-                      "content": "3 niedrige Konfidenz"
+                      "content": "3 niedrige Konfidenz",
+                      "x": 20,
+                      "y": 92
                     }
                   }
                 }
@@ -21473,9 +21744,17 @@
                       "name": "tr1b",
                       "x": 222,
                       "y": 12,
+                      "width": "fit_content",
+                      "height": "fit_content",
                       "descendants": {
+                        "8rr2c": {
+                          "x": 10,
+                          "y": 7.5
+                        },
                         "l8P98": {
-                          "content": "Verifiziert"
+                          "content": "Verifiziert",
+                          "x": 24,
+                          "y": 4
                         }
                       }
                     }
@@ -21526,9 +21805,17 @@
                       "name": "tr2b",
                       "x": 194,
                       "y": 12,
+                      "width": "fit_content",
+                      "height": "fit_content",
                       "descendants": {
+                        "DB1Jl": {
+                          "x": 10,
+                          "y": 7.5
+                        },
                         "PEKND": {
-                          "content": "Prüfung"
+                          "content": "Prüfung",
+                          "x": 24,
+                          "y": 4
                         }
                       }
                     }
@@ -21573,9 +21860,17 @@
                       "name": "tr3b",
                       "x": 213,
                       "y": 12,
+                      "width": "fit_content",
+                      "height": "fit_content",
                       "descendants": {
+                        "8rr2c": {
+                          "x": 10,
+                          "y": 7.5
+                        },
                         "l8P98": {
-                          "content": "Verifiziert"
+                          "content": "Verifiziert",
+                          "x": 24,
+                          "y": 4
                         }
                       }
                     }
@@ -21586,6 +21881,17 @@
           ]
         }
       ]
+    },
+    {
+      "type": "text",
+      "id": "jKJYG",
+      "x": 0,
+      "y": 0,
+      "fill": "#000000",
+      "content": "roger@mueller.ro",
+      "fontFamily": "Inter",
+      "fontSize": 12,
+      "fontWeight": "normal"
     }
   ],
   "variables": {
