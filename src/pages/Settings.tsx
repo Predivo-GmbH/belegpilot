@@ -307,6 +307,40 @@ export default function Settings() {
               <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-ink-secondary">Inaktiv</span>
             </div>
           </div>
+
+          <div className="mt-8 border-t border-border pt-6">
+            <h2 className="text-lg font-semibold text-destructive">Konto löschen</h2>
+            <p className="mt-1 text-sm text-ink-secondary">
+              Alle Ihre Daten, Dokumente und Teammitglieder werden unwiderruflich gelöscht.
+            </p>
+            <button
+              onClick={async () => {
+                if (!confirm('Sind Sie sicher? Alle Daten werden unwiderruflich gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.')) return
+                try {
+                  const { data: { session } } = await supabase.auth.getSession()
+                  if (!session?.access_token) throw new Error('Keine aktive Sitzung')
+                  const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${session.access_token}`,
+                    },
+                  })
+                  if (!res.ok) {
+                    const body = await res.json().catch(() => ({}))
+                    throw new Error(body.error ?? 'Fehler beim Löschen')
+                  }
+                  await supabase.auth.signOut()
+                  window.location.href = '/'
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : 'Konto konnte nicht gelöscht werden')
+                }
+              }}
+              className="mt-3 inline-flex h-9 items-center rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"
+            >
+              Konto endgültig löschen
+            </button>
+          </div>
         </div>
       )}
     </AppLayout>

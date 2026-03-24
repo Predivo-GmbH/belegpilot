@@ -34,18 +34,9 @@ function PageLoader() {
   )
 }
 
-function DevBanner() {
-  return (
-    <div className="bg-status-warning px-4 py-2 text-center text-sm font-medium text-foreground">
-      This site is currently under active development and is not yet functional. Features, content, and design may change without notice.
-    </div>
-  )
-}
-
 function AppRouter() {
   return (
     <BrowserRouter>
-      <DevBanner />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Landing />} />

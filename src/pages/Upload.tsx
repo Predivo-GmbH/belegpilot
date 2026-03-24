@@ -95,8 +95,31 @@ export default function Upload() {
 
       if (dbError) throw dbError
 
+      setFiles((prev) => prev.map((f) => f.id === uploadFile.id ? { ...f, status: 'processing' as const, progress: 80 } : f))
+
+      // Trigger AI processing pipeline (fire-and-forget)
+      const { data: inserted } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('file_path', filePath)
+        .single()
+
+      if (inserted?.id) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.access_token) {
+          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-document`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ documentId: inserted.id, filePath }),
+          }).catch(console.error)
+        }
+      }
+
       setFiles((prev) => prev.map((f) => f.id === uploadFile.id ? { ...f, status: 'done' as const, progress: 100 } : f))
-      toast.success(`${uploadFile.file.name} erfolgreich hochgeladen`)
+      toast.success(`${uploadFile.file.name} hochgeladen — wird verarbeitet`)
 
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['documents'] })
