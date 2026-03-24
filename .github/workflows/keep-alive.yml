@@ -16,16 +16,21 @@ jobs:
             -H "apikey: ${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.VITE_SUPABASE_ANON_KEY }}")
           echo "REST API response: $response"
-          if [ "$response" -ne 200 ]; then
-            echo "::warning::Supabase REST ping returned $response"
+          if [ "$response" -eq 000 ]; then
+            echo "::error::Supabase project is unreachable (paused or down)"
             exit 1
           fi
+          echo "REST API is responding (status $response)"
       - name: Ping Supabase Auth
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" \
             "${{ secrets.VITE_SUPABASE_URL }}/auth/v1/health" \
             -H "apikey: ${{ secrets.VITE_SUPABASE_ANON_KEY }}")
           echo "Auth health response: $response"
+          if [ "$response" -ne 200 ]; then
+            echo "::error::Auth health check failed with $response"
+            exit 1
+          fi
       - name: Ping Supabase Storage
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" \
