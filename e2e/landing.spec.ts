@@ -5,7 +5,7 @@ async function unlockGate(page: Page) {
   // If gate is showing, unlock it
   const gateInput = page.getByPlaceholder('Passwort')
   if (await gateInput.isVisible({ timeout: 1000 }).catch(() => false)) {
-    await gateInput.fill('belegpilot2026')
+    await gateInput.fill('predivo2026')
     await page.getByRole('button', { name: 'Weiter' }).click()
   }
 }

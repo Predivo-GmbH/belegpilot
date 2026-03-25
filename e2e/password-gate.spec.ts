@@ -22,7 +22,7 @@ test.describe('Password Gate', () => {
 
   test('unlocks with correct password', async ({ page }) => {
     await page.goto('/')
-    await page.getByPlaceholder('Passwort').fill('belegpilot2026')
+    await page.getByPlaceholder('Passwort').fill('predivo2026')
     await page.getByRole('button', { name: 'Weiter' }).click()
     // Should show the landing page content
     await expect(page.getByText('Aus Schuhkartons voller Belege')).toBeVisible()
