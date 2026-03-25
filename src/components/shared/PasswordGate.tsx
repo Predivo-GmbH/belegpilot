@@ -1,27 +1,33 @@
 import { useState, type ReactNode } from 'react'
 
-interface PasswordGateProps {
-  password: string
-  children: ReactNode
-}
-
+const GATE_PASSWORD_HASH = '3bd8037a8ed38a35825983767f94e6cf3b18c3deee1601daee71faec0d83565f'
 const STORAGE_KEY = 'belegpilot-unlocked'
 
-export function PasswordGate({ password, children }: PasswordGateProps) {
-  const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem(STORAGE_KEY) === 'true')
-  const [input, setInput] = useState('')
+async function sha256(message: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(message)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+export function PasswordGate({ children }: { children: ReactNode }) {
+  const [unlocked, setUnlocked] = useState(
+    () => sessionStorage.getItem(STORAGE_KEY) === 'true'
+  )
+  const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
 
   if (unlocked) return <>{children}</>
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (input === password) {
+    const inputHash = await sha256(password)
+    if (inputHash === GATE_PASSWORD_HASH) {
       sessionStorage.setItem(STORAGE_KEY, 'true')
       setUnlocked(true)
     } else {
       setError(true)
-      setInput('')
+      setPassword('')
     }
   }
 
@@ -34,8 +40,8 @@ export function PasswordGate({ password, children }: PasswordGateProps) {
         </div>
         <input
           type="password"
-          value={input}
-          onChange={(e) => { setInput(e.target.value); setError(false) }}
+          value={password}
+          onChange={(e) => { setPassword(e.target.value); setError(false) }}
           placeholder="Passwort"
           className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
           autoFocus

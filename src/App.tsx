@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { Suspense, lazy } from 'react'
 import { ProtectedRoute } from '@/components/shared/ProtectedRoute'
+import { PasswordGate } from '@/components/shared/PasswordGate'
 
 const Landing = lazy(() => import('@/pages/Landing'))
 const Auth = lazy(() => import('@/pages/Auth'))
@@ -59,9 +60,11 @@ function AppRouter() {
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AppRouter />
-      <Toaster position="top-right" richColors closeButton />
-    </QueryClientProvider>
+    <PasswordGate>
+      <QueryClientProvider client={queryClient}>
+        <AppRouter />
+        <Toaster position="top-right" richColors closeButton />
+      </QueryClientProvider>
+    </PasswordGate>
   )
 }

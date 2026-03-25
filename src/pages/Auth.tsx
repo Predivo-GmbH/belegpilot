@@ -248,7 +248,7 @@ export default function Auth() {
             <form onSubmit={handleSignupSendOtp} className="space-y-4">
               <div>
                 <h1 className="text-2xl font-bold text-foreground">Konto erstellen</h1>
-                <p className="mt-1 text-sm text-ink-secondary">30 Tage kostenlos — keine Kreditkarte nötig</p>
+                <p className="mt-1 text-sm text-ink-secondary">14 Tage kostenlos — keine Kreditkarte nötig</p>
               </div>
               <div>
                 <label htmlFor="signup-email" className="mb-1 block text-sm font-medium text-foreground">E-Mail</label>

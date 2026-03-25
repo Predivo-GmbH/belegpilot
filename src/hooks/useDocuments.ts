@@ -6,6 +6,11 @@ import type { Database } from '@/types/database'
 type DocumentRow = Database['public']['Tables']['documents']['Row']
 export type DocumentWithClient = DocumentRow & { clients: { name: string } | null }
 
+/** Escape special PostgREST filter characters to prevent injection. */
+function sanitizeSearch(raw: string): string {
+  return raw.replace(/[%_*(),.'"\\]/g, '')
+}
+
 export function useDocuments(filters?: { status?: string; search?: string }) {
   const { user } = useAuth()
 
@@ -24,7 +29,10 @@ export function useDocuments(filters?: { status?: string; search?: string }) {
       }
 
       if (filters?.search) {
-        query = query.or(`file_name.ilike.%${filters.search}%,supplier_name.ilike.%${filters.search}%`)
+        const safe = sanitizeSearch(filters.search)
+        if (safe.length > 0) {
+          query = query.or(`file_name.ilike.%${safe}%,supplier_name.ilike.%${safe}%`)
+        }
       }
 
       const { data, error } = await query
