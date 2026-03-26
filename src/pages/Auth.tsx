@@ -136,6 +136,23 @@ export default function Auth() {
       return
     }
 
+    // Persist org name + full name to database tables
+    // (the trigger created defaults; now update with real values)
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    if (currentUser) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', currentUser.id)
+        .single()
+      if (profile) {
+        await Promise.all([
+          supabase.from('profiles').update({ full_name: fullName }).eq('id', currentUser.id),
+          supabase.from('organizations').update({ name: orgName }).eq('id', profile.organization_id),
+        ])
+      }
+    }
+
     // Send welcome email via edge function (best-effort)
     supabase.functions.invoke('send-welcome', { method: 'POST' }).catch(() => {})
 

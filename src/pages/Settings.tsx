@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Database } from '@/types/database'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 
@@ -17,7 +18,7 @@ type SettingsTab = 'firm' | 'team' | 'erp' | 'billing' | 'security'
 const TABS: { id: SettingsTab; label: string }[] = [
   { id: 'firm', label: 'Firmenprofil' },
   { id: 'team', label: 'Team' },
-  { id: 'erp', label: 'ERP-Verbindungen' },
+  { id: 'erp', label: 'ERP-Exportformate' },
   { id: 'billing', label: 'Abrechnung' },
   { id: 'security', label: 'Sicherheit' },
 ]
@@ -94,6 +95,39 @@ export default function Settings() {
     }
   }
 
+  // Plan change via Stripe
+  const [isChangingPlan, setIsChangingPlan] = useState(false)
+  const handleChangePlan = async () => {
+    setIsChangingPlan(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) throw new Error('Keine aktive Sitzung')
+
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ plan: currentPlan === 'starter' ? 'professional' : 'enterprise' }),
+      })
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error ?? 'Fehler beim Erstellen der Checkout-Sitzung')
+      }
+
+      const { url } = await res.json()
+      if (url) {
+        window.location.href = url
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Plan konnte nicht geändert werden')
+    } finally {
+      setIsChangingPlan(false)
+    }
+  }
+
   const currentPlan = (org?.plan ?? 'starter') as keyof typeof SUBSCRIPTION_TIERS
   const tier = SUBSCRIPTION_TIERS[currentPlan]
 
@@ -135,26 +169,9 @@ export default function Settings() {
               <input id="firm-name" name="firm-name" type="text" defaultValue={org?.name ?? ''} className={inputClass} />
             </div>
             <div>
-              <label htmlFor="firm-street" className="mb-1 block text-sm font-medium text-foreground">Strasse und Hausnummer</label>
-              <input id="firm-street" type="text" placeholder="Bahnhofstrasse 42" className={inputClass} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firm-plz" className="mb-1 block text-sm font-medium text-foreground">PLZ</label>
-                <input id="firm-plz" type="text" placeholder="8001" className={inputClass} />
-              </div>
-              <div>
-                <label htmlFor="firm-city" className="mb-1 block text-sm font-medium text-foreground">Ort</label>
-                <input id="firm-city" type="text" placeholder="Zürich" className={inputClass} />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="firm-phone" className="mb-1 block text-sm font-medium text-foreground">Telefon</label>
-              <input id="firm-phone" type="tel" placeholder="+41 44 123 45 67" className={inputClass} />
-            </div>
-            <div>
               <label htmlFor="firm-email" className="mb-1 block text-sm font-medium text-foreground">E-Mail</label>
-              <input id="firm-email" type="email" defaultValue={user?.email ?? ''} className={inputClass} />
+              <input id="firm-email" type="email" defaultValue={user?.email ?? ''} disabled className={cn(inputClass, 'opacity-60')} />
+              <p className="mt-1 text-xs text-ink-muted">Wird über Ihr Konto verwaltet.</p>
             </div>
           </div>
           <button
@@ -171,12 +188,7 @@ export default function Settings() {
       {/* Team */}
       {tab === 'team' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-foreground">Teammitglieder</h2>
-            <button className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover">
-              Einladen
-            </button>
-          </div>
+          <h2 className="text-lg font-semibold text-foreground">Teammitglieder</h2>
           <div className="overflow-x-auto rounded-lg border border-border bg-card">
             <table className="w-full min-w-[400px]">
               <thead>
@@ -215,26 +227,28 @@ export default function Settings() {
         </div>
       )}
 
-      {/* ERP Connections */}
+      {/* ERP Export Formats */}
       {tab === 'erp' && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-foreground">ERP-Verbindungen</h2>
-          <p className="text-sm text-ink-secondary">Konfigurieren Sie die Exportformate für jeden Mandanten. BelegPilot unterstützt alle gängigen Schweizer ERP-Systeme.</p>
+          <h2 className="text-lg font-semibold text-foreground">ERP-Exportformate</h2>
+          <p className="text-sm text-ink-secondary">BelegPilot unterstützt alle gängigen Schweizer ERP-Systeme. Wählen Sie beim Export einfach das gewünschte Format aus.</p>
           <div className="rounded-lg border border-border bg-card">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
                   <th className="px-4 py-2.5 text-left text-table-header">ERP-SYSTEM</th>
+                  <th className="px-4 py-2.5 text-left text-table-header">FORMAT</th>
                   <th className="px-4 py-2.5 text-left text-table-header">STATUS</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {Object.values(ERP_TARGETS).map((erp) => (
-                  <tr key={erp.label}>
+                {Object.entries(ERP_TARGETS).map(([key, erp]) => (
+                  <tr key={key}>
                     <td className="px-4 py-3 text-sm font-medium text-foreground">{erp.label}</td>
+                    <td className="px-4 py-3 text-sm uppercase text-ink-secondary">{erp.format}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center rounded-full bg-status-success-light px-2 py-0.5 text-xs font-medium text-status-success">
-                        Aktiv
+                        Verfügbar
                       </span>
                     </td>
                   </tr>
@@ -254,11 +268,20 @@ export default function Settings() {
               <div>
                 <p className="text-sm text-ink-muted">Plan</p>
                 <p className="text-lg font-semibold text-foreground">{tier.name} — CHF {tier.price}/Monat</p>
-                <p className="mt-1 text-sm text-ink-secondary">Monatslimit: {tier.documentsPerMonth.toLocaleString()} Dokumente</p>
+                <p className="mt-1 text-sm text-ink-secondary">
+                  Monatslimit: {tier.documentsPerMonth === Infinity ? 'Unbegrenzt' : tier.documentsPerMonth.toLocaleString()} Dokumente
+                </p>
               </div>
-              <button className="inline-flex h-8 items-center rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted">
-                Plan ändern
-              </button>
+              {currentPlan !== 'enterprise' && (
+                <button
+                  onClick={handleChangePlan}
+                  disabled={isChangingPlan}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                >
+                  {isChangingPlan && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {isChangingPlan ? 'Laden...' : 'Upgrade'}
+                </button>
+              )}
             </div>
           </div>
 
@@ -266,14 +289,18 @@ export default function Settings() {
           <div className="rounded-lg border border-border bg-card p-6">
             <div className="flex items-center justify-between text-sm">
               <span className="text-ink-secondary">Dokumente verarbeitet</span>
-              <span className="font-mono font-medium text-foreground">{org?.documents_this_month ?? 0} / {tier.documentsPerMonth.toLocaleString()}</span>
+              <span className="font-mono font-medium text-foreground">
+                {org?.documents_this_month ?? 0} / {tier.documentsPerMonth === Infinity ? '∞' : tier.documentsPerMonth.toLocaleString()}
+              </span>
             </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${Math.min(100, ((org?.documents_this_month ?? 0) / tier.documentsPerMonth) * 100)}%` }}
-              />
-            </div>
+            {tier.documentsPerMonth !== Infinity && (
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${Math.min(100, ((org?.documents_this_month ?? 0) / tier.documentsPerMonth) * 100)}%` }}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -297,16 +324,6 @@ export default function Settings() {
               Passwort ändern
             </button>
           </form>
-
-          <div className="mt-8 border-t border-border pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Zwei-Faktor-Authentifizierung</h2>
-                <p className="text-sm text-ink-secondary">Erhöhen Sie die Sicherheit Ihres Kontos mit einem zweiten Authentifizierungsfaktor.</p>
-              </div>
-              <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-ink-secondary">Inaktiv</span>
-            </div>
-          </div>
 
           <div className="mt-8 border-t border-border pt-6">
             <h2 className="text-lg font-semibold text-destructive">Konto löschen</h2>

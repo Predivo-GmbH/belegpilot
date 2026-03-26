@@ -16,8 +16,8 @@ import { sendEmail, usageAlertEmail } from '../_shared/email.ts'
  */
 
 const PLAN_QUOTAS: Record<string, number> = {
-  starter: 50,
-  professional: 500,
+  starter: 200,
+  professional: 1000,
   enterprise: 5000,
 }
 

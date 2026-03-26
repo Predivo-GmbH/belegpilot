@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, CheckCircle, Download, FileText, Loader2 } from 'lucide-react'
 import { AppLayout } from '@/components/layout/AppLayout'
@@ -77,11 +78,34 @@ function buildFields(doc: Record<string, unknown>): ExtractionField[] {
   return fields
 }
 
+function useDocumentPreview(filePath: string | undefined) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isLoadingPreview, setIsLoadingPreview] = useState(!!filePath)
+
+  useEffect(() => {
+    if (!filePath) return
+    let cancelled = false
+    supabase.storage
+      .from('documents')
+      .createSignedUrl(filePath, 3600)
+      .then(({ data }) => {
+        if (!cancelled && data?.signedUrl) setPreviewUrl(data.signedUrl)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingPreview(false)
+      })
+    return () => { cancelled = true }
+  }, [filePath])
+
+  return { previewUrl, isLoadingPreview }
+}
+
 export default function DocumentReview() {
   const { id } = useParams()
   usePageTitle('Dokument')
   const { data: doc, isLoading } = useDocument(id)
   const queryClient = useQueryClient()
+  const { previewUrl, isLoadingPreview } = useDocumentPreview(doc?.file_path)
 
   const verifyMutation = useMutation({
     mutationFn: async () => {
@@ -100,6 +124,23 @@ export default function DocumentReview() {
     },
     onError: () => toast.error('Fehler beim Verifizieren'),
   })
+
+  const handleDownload = async () => {
+    if (!doc?.file_path) return
+    const { data } = await supabase.storage
+      .from('documents')
+      .createSignedUrl(doc.file_path, 60)
+    if (data?.signedUrl) {
+      const a = document.createElement('a')
+      a.href = data.signedUrl
+      a.download = doc.file_name
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+    } else {
+      toast.error('Download konnte nicht erstellt werden')
+    }
+  }
 
   if (isLoading) {
     return (
@@ -123,6 +164,8 @@ export default function DocumentReview() {
 
   const fields = buildFields(doc as unknown as Record<string, unknown>)
   const clientName = doc.clients?.name
+  const isPdf = doc.file_type === 'application/pdf'
+  const isImage = doc.file_type?.startsWith('image/')
 
   return (
     <AppLayout
@@ -137,7 +180,11 @@ export default function DocumentReview() {
             <ArrowLeft className="h-4 w-4" />
             Zurück
           </Link>
-          <button aria-label="Dokument herunterladen" className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted">
+          <button
+            aria-label="Dokument herunterladen"
+            onClick={handleDownload}
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted"
+          >
             <Download className="h-4 w-4" aria-hidden="true" />
             Speichern
           </button>
@@ -162,14 +209,33 @@ export default function DocumentReview() {
           <div className="border-b border-border px-4 py-3">
             <h2 className="text-sm font-medium text-foreground">Original</h2>
           </div>
-          <div className="flex h-[600px] items-center justify-center bg-muted p-4">
-            <div className="text-center">
-              <FileText className="mx-auto h-12 w-12 text-ink-muted" />
-              <p className="mt-2 text-sm text-ink-muted">
-                Dokumentvorschau — wird mit Supabase Storage verbunden
-              </p>
-              <p className="mt-1 text-xs text-ink-disabled">ID: {id}</p>
-            </div>
+          <div className="h-[600px] overflow-auto bg-muted">
+            {isLoadingPreview ? (
+              <div className="flex h-full items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : previewUrl && isPdf ? (
+              <iframe
+                src={previewUrl}
+                className="h-full w-full"
+                title="Dokumentvorschau"
+              />
+            ) : previewUrl && isImage ? (
+              <img
+                src={previewUrl}
+                alt={doc.file_name}
+                className="h-full w-full object-contain p-4"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-center">
+                <div>
+                  <FileText className="mx-auto h-12 w-12 text-ink-muted" />
+                  <p className="mt-2 text-sm text-ink-muted">
+                    Vorschau nicht verfügbar
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

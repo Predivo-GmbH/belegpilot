@@ -25,10 +25,8 @@ test.describe('Auth Page', () => {
   test('switches to signup form', async ({ page }) => {
     await page.getByRole('button', { name: 'Jetzt registrieren' }).click()
     await expect(page.getByRole('heading', { name: 'Konto erstellen' })).toBeVisible()
-    await expect(page.getByLabel('Firmenname')).toBeVisible()
-    await expect(page.getByLabel('Vollständiger Name')).toBeVisible()
     await expect(page.getByLabel('E-Mail')).toBeVisible()
-    await expect(page.getByLabel('Passwort')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Bestätigungscode senden' })).toBeVisible()
   })
 
   test('switches to forgot password form', async ({ page }) => {
