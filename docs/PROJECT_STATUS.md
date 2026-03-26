@@ -229,28 +229,43 @@ VITE_PASSWORD_GATE=belegpilot2026
 - Password gate protection
 - Dashboard with real-time stats from Supabase
 - Document upload → Storage → DB record → processing trigger
-- Storage RLS policies (org-scoped file access)
+- Storage RLS policies (org-scoped file access, 4 policies: INSERT/SELECT/UPDATE/DELETE)
 - Documents list with search + status filters
 - Document review page with file preview + extracted data editing
 - Client CRUD (create, edit, delete) with search
 - Export page with 5 ERP format tabs
 - Settings with company profile editing
-- Stripe checkout integration for plan upgrades
+- Stripe checkout integration (code complete, needs Stripe keys to activate)
 - Zero-downtime deploy via GitHub Actions FTP
-- Daily Supabase keep-alive
+- Daily Supabase keep-alive (GraphQL ping)
 - 13 e2e tests passing (5 public + 8 authenticated)
+- AI document processing via Claude Sonnet vision API (edge function deployed)
 
-### Known Limitations
-- `process-document` edge function CORS only allows `belegpilot.predivo.ch` (not localhost)
-- Edge function processing not testable from local dev (CORS restriction, expected behavior)
-- Stripe webhooks require production Stripe keys to work end-to-end
-- Email delivery (welcome, usage alerts) depends on Resend API key being set
-- Team management UI exists but invite functionality is not wired up
-- ERP-Exportformate and Sicherheit settings tabs are placeholder UI
-- No dark mode (by design — brand decision)
+### Verified Infrastructure (2026-03-26)
+- **Auth config:** Site URL `https://belegpilot.predivo.ch`, OTP 6 digits / 600s expiry, autoconfirm enabled, German email subjects
+- **Redirect URLs:** `https://belegpilot.predivo.ch/**`, `http://localhost:5173/**`
+- **Edge function secrets set:** `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+- **GitHub Actions secrets set:** `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PASSWORD_GATE`, `FTP_HOST`, `FTP_USER`, `FTP_PASS`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `ANTHROPIC_API_KEY`
+- **DB pooler:** `aws-1-eu-central-1.pooler.supabase.com:5432` (NOT aws-0)
+
+### What's Still Missing (for future sessions)
+1. **Stripe integration (not yet configured):**
+   - `STRIPE_SECRET_KEY` — needs Stripe account setup + key generation
+   - `STRIPE_WEBHOOK_SECRET` — needs webhook endpoint configured in Stripe dashboard
+   - `STRIPE_PRICE_STARTER`, `STRIPE_PRICE_PROFESSIONAL`, `STRIPE_PRICE_ENTERPRISE` — needs Stripe products/prices created
+   - These must be set as both Supabase edge function secrets AND (for webhook) configured in Stripe dashboard
+2. **Team management:** UI exists but invite functionality is not wired up (no invite email sending, no role assignment logic)
+3. **Settings tabs:** ERP-Exportformate and Sicherheit tabs are placeholder UI only
+4. **Email templates:** Welcome + usage alert edge functions are deployed and `RESEND_API_KEY` is set, but email templates need real sender domain verification in Resend
+5. **No own domain** — uses `belegpilot.predivo.ch` subdomain (sufficient for now)
+
+### Known Limitations (by design)
+- `process-document` edge function CORS only allows `belegpilot.predivo.ch` (not localhost) — local dev cannot trigger AI processing
+- No dark mode (brand decision — light only)
 
 ### Infrastructure
-- Supabase project: Free tier (account: `supabse@belegpilot.predivo.ch`)
-- Hosting: Metanet (FTP deploy to `belegpilot.predivo.ch`)
-- Domain: `belegpilot.predivo.ch` (subdomain of predivo.ch)
-- GitHub: `Arivioo/belegpilot` (private repo)
+- **Supabase:** Free tier, project `lybpfwzpoiutuqggbixg` (account: `supabse@belegpilot.predivo.ch`)
+- **Hosting:** Metanet (FTP deploy to `belegpilot.predivo.ch`)
+- **Domain:** `belegpilot.predivo.ch` (subdomain of predivo.ch)
+- **GitHub:** `Arivioo/belegpilot` (private repo)
+- **Commits:** 27 on `master`
