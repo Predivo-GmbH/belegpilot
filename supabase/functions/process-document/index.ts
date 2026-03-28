@@ -305,16 +305,20 @@ Rules:
     })
 
     // Trigger usage alert check (fire-and-forget)
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    fetch(`${supabaseUrl}/functions/v1/send-usage-alert`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${serviceKey}`,
-      },
-      body: JSON.stringify({ org_id: profile.organization_id }),
-    }).catch(() => {}) // Best-effort
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!supabaseUrl || !serviceKey) {
+      console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for usage alert')
+    } else {
+      fetch(`${supabaseUrl}/functions/v1/send-usage-alert`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${serviceKey}`,
+        },
+        body: JSON.stringify({ org_id: profile.organization_id }),
+      }).catch(() => {}) // Best-effort
+    }
 
     return jsonResponse({
       success: true,

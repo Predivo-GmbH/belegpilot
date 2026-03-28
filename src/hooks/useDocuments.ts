@@ -49,10 +49,11 @@ export function useDocument(id: string | undefined) {
     queryKey: ['document', id],
     enabled: !!user && !!id,
     queryFn: async () => {
+      if (!id) throw new Error('No document ID')
       const { data, error } = await supabase
         .from('documents')
         .select('*, clients(name)')
-        .eq('id', id!)
+        .eq('id', id)
         .single()
 
       if (error) throw error

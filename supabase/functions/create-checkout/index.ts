@@ -3,7 +3,14 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@14?target=deno'
 import { corsHeaders } from '../_shared/cors.ts'
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { apiVersion: '2024-04-10' })
+const ALLOWED_REDIRECT_ORIGINS = [
+  'https://belegpilot.predivo.ch',
+  'http://localhost:5173',
+]
+
+const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
+if (!stripeKey) throw new Error('STRIPE_SECRET_KEY is not configured')
+const stripe = new Stripe(stripeKey, { apiVersion: '2024-04-10' })
 
 /**
  * create-checkout: Create a Stripe Checkout session for plan upgrade
@@ -26,9 +33,18 @@ serve(async (req: Request) => {
       })
     }
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return new Response(JSON.stringify({ error: 'Server misconfiguration' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
+      supabaseUrl,
+      supabaseAnonKey,
       { global: { headers: { Authorization: authHeader } } },
     )
 
@@ -82,12 +98,18 @@ serve(async (req: Request) => {
       customerId = customer.id
     }
 
+    // Validate redirect origin to prevent open redirect
+    const requestOrigin = req.headers.get('origin') ?? ''
+    const redirectOrigin = ALLOWED_REDIRECT_ORIGINS.includes(requestOrigin)
+      ? requestOrigin
+      : ALLOWED_REDIRECT_ORIGINS[0]
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${req.headers.get('origin')}/dashboard?checkout=success`,
-      cancel_url: `${req.headers.get('origin')}/pricing`,
+      success_url: `${redirectOrigin}/dashboard?checkout=success`,
+      cancel_url: `${redirectOrigin}/pricing`,
       metadata: {
         org_id: profile.organization_id,
         plan,
@@ -100,7 +122,7 @@ serve(async (req: Request) => {
   } catch (error) {
     console.error('Checkout error:', error)
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   }

@@ -22,15 +22,15 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-          <AlertTriangle className="h-12 w-12 text-status-warning" />
+        <div role="alert" className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+          <AlertTriangle className="h-12 w-12 text-status-warning" aria-hidden="true" />
           <h1 className="mt-4 text-2xl font-semibold text-foreground">Etwas ist schiefgelaufen</h1>
           <p className="mt-2 text-sm text-ink-secondary">
             Ein unerwarteter Fehler ist aufgetreten. Bitte laden Sie die Seite neu.
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-6 inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
+            className="mt-6 inline-flex min-h-[44px] items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
           >
             Seite neu laden
           </button>

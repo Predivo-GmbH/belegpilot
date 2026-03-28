@@ -19,9 +19,17 @@ export async function authenticateRequest(req: Request): Promise<AuthResult> {
     throw new AuthError('Missing authorization header', 401)
   }
 
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+  if (!supabaseUrl || !anonKey || !serviceRoleKey) {
+    throw new AuthError('Server misconfiguration: missing Supabase env vars', 500)
+  }
+
   const userClient = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_ANON_KEY')!,
+    supabaseUrl,
+    anonKey,
     { global: { headers: { Authorization: authHeader } } }
   )
 
@@ -31,8 +39,8 @@ export async function authenticateRequest(req: Request): Promise<AuthResult> {
   }
 
   const adminClient = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    supabaseUrl,
+    serviceRoleKey
   )
 
   return { user: { id: user.id, email: user.email }, userClient, adminClient }

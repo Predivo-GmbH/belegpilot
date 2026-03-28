@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Loader2, CheckCircle } from 'lucide-react'
+import { BelegPilotLogo } from '@/components/shared/BelegPilotLogo'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { PageMeta } from '@/components/shared/PageMeta'
 
 type AuthMode = 'login' | 'signup' | 'verify' | 'profile' | 'forgot' | 'reset'
 
@@ -202,22 +204,16 @@ export default function Auth() {
     setLoading(false)
   }
 
-  const inputClass = 'h-10 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground placeholder:text-ink-muted focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring'
+  const inputClass = 'min-h-[44px] w-full rounded-md border border-input bg-card px-3 text-base md:text-sm text-foreground placeholder:text-ink-muted focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring'
 
   return (
+    <>
+    <PageMeta title="Anmelden" noindex />
     <div className="flex min-h-screen">
       {/* Left panel — brand */}
-      <div className="hidden w-1/2 flex-col justify-center bg-primary p-12 lg:flex">
+      <div className="hidden w-1/2 flex-col justify-center bg-primary p-8 lg:flex xl:p-12">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground">
-            <svg width="22" height="22" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-              <path
-                d="M10 37c-2 0-3-1-3-4-0.5-8-0.5-18 0-26 0-3 2-4 4-4l8 0c6 0 10 4 10 9 0 4-3 7-7 7.5 5 0.5 9 4.5 9 9 0 5.5-5 8.5-11 8.5z m3-29c0 0 4-0.5 6 0 3 1 4.5 2.5 4.5 4.5 0 2-1.5 4-5 4.5l-5.5 0z m0 14c0 0 5-0.5 7 0 3 1 5 3 5 5.5 0 2.5-2 4.5-5.5 4.5l-6.5 0z"
-                fill="#0E7C6B"
-                fillRule="evenodd"
-              />
-            </svg>
-          </div>
+          <BelegPilotLogo size="lg" />
           <span className="text-xl font-bold text-white">BelegPilot</span>
         </div>
         <p className="mt-4 max-w-md text-base leading-relaxed text-white/80">
@@ -227,8 +223,13 @@ export default function Auth() {
       </div>
 
       {/* Right panel — form */}
-      <div className="flex flex-1 items-center justify-center bg-background px-6">
+      <div className="flex flex-1 items-center justify-center bg-background px-4 sm:px-6">
         <div className="w-full max-w-md space-y-6">
+          {/* Mobile brand header (shown when left panel is hidden) */}
+          <div className="flex items-center gap-2.5 lg:hidden">
+            <BelegPilotLogo />
+            <span className="text-sm font-semibold text-foreground">BelegPilot</span>
+          </div>
           {/* Login */}
           {mode === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
@@ -239,23 +240,23 @@ export default function Auth() {
               <div className="space-y-3">
                 <div>
                   <label htmlFor="login-email" className="mb-1 block text-sm font-medium text-foreground">E-Mail</label>
-                  <input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@treuhand.ch" required className={inputClass} />
+                  <input id="login-email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@treuhand.ch" required className={inputClass} />
                 </div>
                 <div>
                   <label htmlFor="login-password" className="mb-1 block text-sm font-medium text-foreground">Passwort</label>
                   <input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required autoComplete="current-password" className={inputClass} />
                 </div>
               </div>
-              <button type="button" onClick={() => { setMode('forgot'); resetMessages() }} className="text-sm font-medium text-primary hover:underline">
+              <button type="button" onClick={() => { setMode('forgot'); resetMessages() }} className="min-h-[44px] text-sm font-medium text-primary hover:underline">
                 Passwort vergessen?
               </button>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <button type="submit" disabled={loading} className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Anmelden'}
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+              <button type="submit" disabled={loading} className="flex min-h-[44px] w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
+                {loading ? <span role="status"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /><span className="sr-only">Laden...</span></span> : 'Anmelden'}
               </button>
               <p className="text-center text-sm text-ink-secondary">
                 Noch kein Konto?{' '}
-                <button type="button" onClick={() => { setMode('signup'); resetMessages() }} className="font-medium text-primary hover:underline">Jetzt registrieren</button>
+                <button type="button" onClick={() => { setMode('signup'); resetMessages() }} className="inline-flex min-h-[44px] items-center font-medium text-primary hover:underline">Jetzt registrieren</button>
               </p>
             </form>
           )}
@@ -269,16 +270,16 @@ export default function Auth() {
               </div>
               <div>
                 <label htmlFor="signup-email" className="mb-1 block text-sm font-medium text-foreground">E-Mail</label>
-                <input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@treuhand.ch" required className={inputClass} />
+                <input id="signup-email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@treuhand.ch" required className={inputClass} />
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
               {success && <p className="text-sm text-status-success">{success}</p>}
-              <button type="submit" disabled={loading} className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Bestätigungscode senden'}
+              <button type="submit" disabled={loading} className="flex min-h-[44px] w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
+                {loading ? <span role="status"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /><span className="sr-only">Laden...</span></span> : 'Bestätigungscode senden'}
               </button>
               <p className="text-center text-sm text-ink-secondary">
                 Bereits ein Konto?{' '}
-                <button type="button" onClick={() => { setMode('login'); resetMessages() }} className="font-medium text-primary hover:underline">Anmelden</button>
+                <button type="button" onClick={() => { setMode('login'); resetMessages() }} className="inline-flex min-h-[44px] items-center font-medium text-primary hover:underline">Anmelden</button>
               </p>
             </form>
           )}
@@ -306,11 +307,11 @@ export default function Auth() {
                   className={`${inputClass} text-center text-lg tracking-[0.3em]`}
                 />
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <button type="submit" disabled={loading || otpCode.length !== 6} className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Bestätigen'}
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+              <button type="submit" disabled={loading || otpCode.length !== 6} className="flex min-h-[44px] w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
+                {loading ? <span role="status"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /><span className="sr-only">Laden...</span></span> : 'Bestätigen'}
               </button>
-              <button type="button" onClick={() => { setMode('signup'); setOtpCode(''); resetMessages() }} className="flex w-full items-center justify-center text-sm font-medium text-primary hover:underline">
+              <button type="button" onClick={() => { setMode('signup'); setOtpCode(''); resetMessages() }} className="flex min-h-[44px] w-full items-center justify-center text-sm font-medium text-primary hover:underline">
                 ← Andere E-Mail verwenden
               </button>
             </form>
@@ -341,9 +342,9 @@ export default function Auth() {
                   <input id="profile-confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Passwort wiederholen" required minLength={8} autoComplete="new-password" className={inputClass} />
                 </div>
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <button type="submit" disabled={loading} className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Konto erstellen'}
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+              <button type="submit" disabled={loading} className="flex min-h-[44px] w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
+                {loading ? <span role="status"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /><span className="sr-only">Laden...</span></span> : 'Konto erstellen'}
               </button>
             </form>
           )}
@@ -357,14 +358,14 @@ export default function Auth() {
               </div>
               <div>
                 <label htmlFor="forgot-email" className="mb-1 block text-sm font-medium text-foreground">E-Mail</label>
-                <input id="forgot-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@treuhand.ch" required className={inputClass} />
+                <input id="forgot-email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@treuhand.ch" required className={inputClass} />
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
               {success && <p className="text-sm text-status-success">{success}</p>}
-              <button type="submit" disabled={loading} className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Link senden'}
+              <button type="submit" disabled={loading} className="flex min-h-[44px] w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
+                {loading ? <span role="status"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /><span className="sr-only">Laden...</span></span> : 'Link senden'}
               </button>
-              <button type="button" onClick={() => { setMode('login'); resetMessages() }} className="flex w-full items-center justify-center text-sm font-medium text-primary hover:underline">
+              <button type="button" onClick={() => { setMode('login'); resetMessages() }} className="flex min-h-[44px] w-full items-center justify-center text-sm font-medium text-primary hover:underline">
                 ← Zurück zur Anmeldung
               </button>
             </form>
@@ -387,9 +388,9 @@ export default function Auth() {
                   <input id="reset-confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Passwort wiederholen" required minLength={8} autoComplete="new-password" className={inputClass} />
                 </div>
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <button type="submit" disabled={loading} className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Passwort zurücksetzen'}
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+              <button type="submit" disabled={loading} className="flex min-h-[44px] w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50">
+                {loading ? <span role="status"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /><span className="sr-only">Laden...</span></span> : 'Passwort zurücksetzen'}
               </button>
             </form>
           )}
@@ -398,7 +399,7 @@ export default function Auth() {
           {mode === 'reset' && resetDone && (
             <div className="text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-status-success/10">
-                <CheckCircle className="h-7 w-7 text-status-success" />
+                <CheckCircle className="h-7 w-7 text-status-success" aria-hidden="true" />
               </div>
               <h1 className="mt-5 text-2xl font-bold text-foreground">Passwort aktualisiert</h1>
               <p className="mt-2 text-sm text-ink-secondary">
@@ -406,7 +407,7 @@ export default function Auth() {
               </p>
               <button
                 onClick={() => { setMode('login'); setResetDone(false); resetMessages(); setPassword(''); setConfirmPassword('') }}
-                className="mt-6 inline-flex h-10 items-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
+                className="mt-6 inline-flex min-h-[44px] items-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
               >
                 Zur Anmeldung
               </button>
@@ -415,6 +416,7 @@ export default function Auth() {
         </div>
       </div>
     </div>
+    </>
   )
 }
 

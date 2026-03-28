@@ -7,6 +7,7 @@ import { useDocument } from '@/hooks/useDocuments'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { PageMeta } from '@/components/shared/PageMeta'
 import { toast } from 'sonner'
 
 function ConfidenceDot({ confidence }: { confidence: number }) {
@@ -15,7 +16,8 @@ function ConfidenceDot({ confidence }: { confidence: number }) {
     : confidence >= 0.7
       ? 'bg-status-warning'
       : 'bg-status-error'
-  return <span className={cn('inline-block h-2 w-2 rounded-full', color)} />
+  const label = confidence >= 0.9 ? 'Hohe Konfidenz' : confidence >= 0.7 ? 'Mittlere Konfidenz' : 'Niedrige Konfidenz'
+  return <span className={cn('inline-block h-2 w-2 rounded-full', color)} role="img" aria-label={`${label}: ${Math.round(confidence * 100)}%`} />
 }
 
 function SourceBadge({ source }: { source: string }) {
@@ -26,7 +28,7 @@ function SourceBadge({ source }: { source: string }) {
     manual: 'bg-status-warning-light text-status-warning',
   }
   return (
-    <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium uppercase', styles[source] || styles.ai)}>
+    <span className={cn('rounded px-1.5 py-0.5 text-xs font-medium uppercase', styles[source] || styles.ai)}>
       {source}
     </span>
   )
@@ -109,10 +111,11 @@ export default function DocumentReview() {
 
   const verifyMutation = useMutation({
     mutationFn: async () => {
+      if (!id) throw new Error('No document ID')
       const { error } = await supabase
         .from('documents')
         .update({ status: 'verified' })
-        .eq('id', id!)
+        .eq('id', id)
       if (error) throw error
     },
     onSuccess: () => {
@@ -145,8 +148,9 @@ export default function DocumentReview() {
   if (isLoading) {
     return (
       <AppLayout title="Dokument laden..." subtitle="">
-        <div className="flex items-center justify-center p-12">
+        <div className="flex items-center justify-center p-12" role="status">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <span className="sr-only">Laden...</span>
         </div>
       </AppLayout>
     )
@@ -168,14 +172,16 @@ export default function DocumentReview() {
   const isImage = doc.file_type?.startsWith('image/')
 
   return (
+    <>
+    <PageMeta title="Dokumentprüfung" noindex />
     <AppLayout
       title={doc.file_name}
       subtitle={`${clientName ?? '—'} • ${doc.status === 'verified' ? 'Verifiziert' : 'Zur Prüfung'}`}
       action={
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <Link
             to="/documents"
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted"
           >
             <ArrowLeft className="h-4 w-4" />
             Zurück
@@ -183,17 +189,17 @@ export default function DocumentReview() {
           <button
             aria-label="Dokument herunterladen"
             onClick={handleDownload}
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted"
           >
             <Download className="h-4 w-4" aria-hidden="true" />
-            Speichern
+            <span className="hidden sm:inline">Speichern</span>
           </button>
           {doc.status !== 'verified' && (
             <button
               aria-label="Als verifiziert markieren"
               onClick={() => verifyMutation.mutate()}
               disabled={verifyMutation.isPending}
-              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50"
             >
               <CheckCircle className="h-4 w-4" aria-hidden="true" />
               {verifyMutation.isPending ? 'Wird verifiziert...' : 'Verifiziert'}
@@ -209,16 +215,18 @@ export default function DocumentReview() {
           <div className="border-b border-border px-4 py-3">
             <h2 className="text-sm font-medium text-foreground">Original</h2>
           </div>
-          <div className="h-[600px] overflow-auto bg-muted">
+          <div className="h-[min(400px,50vh)] overflow-auto bg-muted lg:h-[min(600px,70vh)]">
             {isLoadingPreview ? (
-              <div className="flex h-full items-center justify-center">
+              <div className="flex h-full items-center justify-center" role="status">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <span className="sr-only">Laden...</span>
               </div>
             ) : previewUrl && isPdf ? (
               <iframe
                 src={previewUrl}
                 className="h-full w-full"
                 title="Dokumentvorschau"
+                sandbox="allow-same-origin"
               />
             ) : previewUrl && isImage ? (
               <img
@@ -229,7 +237,7 @@ export default function DocumentReview() {
             ) : (
               <div className="flex h-full items-center justify-center text-center">
                 <div>
-                  <FileText className="mx-auto h-12 w-12 text-ink-muted" />
+                  <FileText className="mx-auto h-12 w-12 text-ink-muted" aria-hidden="true" />
                   <p className="mt-2 text-sm text-ink-muted">
                     Vorschau nicht verfügbar
                   </p>
@@ -272,5 +280,6 @@ export default function DocumentReview() {
         </div>
       </div>
     </AppLayout>
+    </>
   )
 }

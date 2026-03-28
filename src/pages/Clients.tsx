@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { Plus, Search, Loader2, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Plus, Search, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { cn } from '@/lib/utils'
 import { ERP_TARGETS } from '@/lib/constants'
@@ -8,12 +9,13 @@ import { useProfile } from '@/hooks/useProfile'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Database } from '@/types/database'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { PageMeta } from '@/components/shared/PageMeta'
 import { toast } from 'sonner'
 
 type ClientRow = Database['public']['Tables']['clients']['Row']
 type ErpTarget = ClientRow['erp_target']
 
-const inputClass = 'h-10 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground placeholder:text-ink-muted focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring'
+const inputClass = 'min-h-[44px] w-full rounded-md border border-input bg-card px-3 text-base md:text-sm text-foreground placeholder:text-ink-muted focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring'
 
 function ClientForm({ client, orgId, onClose }: { client?: ClientRow; orgId: string; onClose: () => void }) {
   const queryClient = useQueryClient()
@@ -46,10 +48,10 @@ function ClientForm({ client, orgId, onClose }: { client?: ClientRow; orgId: str
   })
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
-      <h3 className="mb-4 text-base font-semibold text-foreground">
+    <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
+      <h2 className="mb-4 text-base font-semibold text-foreground">
         {isEdit ? 'Mandant bearbeiten' : 'Neuer Mandant'}
-      </h3>
+      </h2>
       <form
         className="space-y-4"
         onSubmit={(e) => {
@@ -81,14 +83,14 @@ function ClientForm({ client, orgId, onClose }: { client?: ClientRow; orgId: str
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50"
           >
             {mutation.isPending ? 'Speichern...' : isEdit ? 'Aktualisieren' : 'Erstellen'}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 items-center rounded-md border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
+            className="inline-flex min-h-[44px] items-center rounded-md border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-muted"
           >
             Abbrechen
           </button>
@@ -106,6 +108,19 @@ export default function Clients() {
   const [showForm, setShowForm] = useState(false)
   const [editingClient, setEditingClient] = useState<ClientRow | undefined>()
   const [openMenu, setOpenMenu] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
+
+  // Close action menu on Escape
+  const handleEscapeMenu = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') setOpenMenu(null)
+  }, [])
+
+  useEffect(() => {
+    if (openMenu) {
+      document.addEventListener('keydown', handleEscapeMenu)
+      return () => document.removeEventListener('keydown', handleEscapeMenu)
+    }
+  }, [openMenu, handleEscapeMenu])
 
   const orgId = profile?.organization_id
 
@@ -113,10 +128,11 @@ export default function Clients() {
     queryKey: ['clients', orgId, search],
     enabled: !!orgId,
     queryFn: async () => {
+      if (!orgId) throw new Error('No org ID')
       let query = supabase
         .from('clients')
         .select('*')
-        .eq('organization_id', orgId!)
+        .eq('organization_id', orgId)
         .order('name')
 
       if (search.trim()) {
@@ -141,20 +157,28 @@ export default function Clients() {
     onError: () => toast.error('Fehler beim Löschen'),
   })
 
-  const handleDelete = (id: string, name: string) => {
-    if (!confirm(`Mandant "${name}" wirklich löschen? Bestehende Dokumente bleiben erhalten.`)) return
-    deleteMutation.mutate(id)
+  const handleDeleteRequest = (id: string, name: string) => {
+    setDeleteTarget({ id, name })
     setOpenMenu(null)
   }
 
+  const handleDeleteConfirm = () => {
+    if (deleteTarget) {
+      deleteMutation.mutate(deleteTarget.id)
+      setDeleteTarget(null)
+    }
+  }
+
   return (
+    <>
+    <PageMeta title="Mandanten" noindex />
     <AppLayout
       title="Mandanten"
       subtitle="Verwalten Sie Ihre Mandanten und deren Einstellungen."
       action={
         <button
           onClick={() => { setEditingClient(undefined); setShowForm(true) }}
-          className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
         >
           <Plus className="h-4 w-4" />
           Neuer Mandant
@@ -165,19 +189,20 @@ export default function Clients() {
         <div className="mb-6">
           <ClientForm
             client={editingClient}
-            orgId={orgId!}
+            orgId={orgId ?? ''}
             onClose={() => { setShowForm(false); setEditingClient(undefined) }}
           />
         </div>
       )}
 
       {/* Search */}
-      <div className="mb-4">
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative w-full sm:flex-1 sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" aria-hidden="true" />
           <input
             type="text"
             placeholder="Mandant suchen..."
+            aria-label="Mandant suchen"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={cn(inputClass, 'pl-9')}
@@ -187,18 +212,21 @@ export default function Clients() {
 
       {/* Table */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <div className="space-y-3 p-4" role="status">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-12 rounded-md bg-muted animate-pulse" />
+          ))}
+          <span className="sr-only">Laden...</span>
         </div>
       ) : !clients || clients.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card py-16">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card py-10 sm:py-16">
           <p className="text-sm font-medium text-foreground">Keine Mandanten</p>
           <p className="mt-1 text-sm text-ink-muted">
             {search ? 'Keine Treffer für Ihre Suche.' : 'Erstellen Sie Ihren ersten Mandanten.'}
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border bg-card">
+        <div className="scroll-fade overflow-x-auto rounded-lg border border-border bg-card">
           <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-border">
@@ -234,29 +262,32 @@ export default function Clients() {
                     <div className="relative inline-block">
                       <button
                         onClick={() => setOpenMenu(openMenu === client.id ? null : client.id)}
-                        className="rounded p-1 text-ink-muted hover:bg-muted hover:text-foreground"
+                        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-ink-muted hover:bg-muted hover:text-foreground"
                         aria-label="Aktionen"
+                        aria-expanded={openMenu === client.id}
                       >
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                       </button>
                       {openMenu === client.id && (
-                        <div className="absolute right-0 z-10 mt-1 w-40 rounded-md border border-border bg-card py-1 shadow-lg">
+                        <div role="menu" className="absolute right-0 z-10 mt-1 w-40 rounded-md border border-border bg-card py-1">
                           <button
+                            role="menuitem"
                             onClick={() => {
                               setEditingClient(client)
                               setShowForm(true)
                               setOpenMenu(null)
                             }}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted"
+                            className="flex min-h-[44px] w-full items-center gap-2 px-3 text-sm text-foreground hover:bg-muted"
                           >
-                            <Pencil className="h-3.5 w-3.5" />
+                            <Pencil className="h-4 w-4" aria-hidden="true" />
                             Bearbeiten
                           </button>
                           <button
-                            onClick={() => handleDelete(client.id, client.name)}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-muted"
+                            role="menuitem"
+                            onClick={() => handleDeleteRequest(client.id, client.name)}
+                            className="flex min-h-[44px] w-full items-center gap-2 px-3 text-sm text-destructive hover:bg-muted"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-4 w-4" aria-hidden="true" />
                             Löschen
                           </button>
                         </div>
@@ -270,5 +301,16 @@ export default function Clients() {
         </div>
       )}
     </AppLayout>
+    <ConfirmDialog
+      open={deleteTarget !== null}
+      title="Mandant löschen"
+      description={`Mandant "${deleteTarget?.name ?? ''}" wirklich löschen? Bestehende Dokumente bleiben erhalten.`}
+      confirmLabel="Löschen"
+      cancelLabel="Abbrechen"
+      variant="destructive"
+      onConfirm={handleDeleteConfirm}
+      onCancel={() => setDeleteTarget(null)}
+    />
+    </>
   )
 }

@@ -6,6 +6,7 @@ import { ERP_TARGETS } from '@/lib/constants'
 import { supabase } from '@/lib/supabase'
 import { useDocuments } from '@/hooks/useDocuments'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { PageMeta } from '@/components/shared/PageMeta'
 import { toast } from 'sonner'
 
 type ErpTarget = keyof typeof ERP_TARGETS
@@ -86,6 +87,8 @@ export default function Export() {
   }
 
   return (
+    <>
+    <PageMeta title="Export" noindex />
     <AppLayout
       title="Export"
       subtitle="Exportieren Sie verifizierte Buchungssätze in Ihr ERP-System."
@@ -94,9 +97,9 @@ export default function Export() {
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50"
           >
-            {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {isExporting ? <span role="status"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /><span className="sr-only">Exportiere...</span></span> : <Download className="h-4 w-4" aria-hidden="true" />}
             {isExporting ? 'Exportiere...' : `${selectedDocs.size} exportieren`}
           </button>
         ) : null
@@ -110,8 +113,9 @@ export default function Export() {
             <button
               key={key}
               onClick={() => setSelectedErp(key)}
+              aria-pressed={selectedErp === key}
               className={cn(
-                'inline-flex h-9 items-center rounded-md border px-4 text-sm font-medium transition-colors',
+                'inline-flex min-h-[44px] items-center rounded-md border px-4 text-sm font-medium transition-colors',
                 selectedErp === key
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border bg-card text-foreground hover:bg-muted',
@@ -125,11 +129,14 @@ export default function Export() {
 
       {/* Document selection */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <div className="space-y-3 p-4" role="status">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-12 rounded-md bg-muted animate-pulse" />
+          ))}
+          <span className="sr-only">Laden...</span>
         </div>
       ) : !documents || documents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card py-16">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card py-10 sm:py-16">
           <CheckCircle className="h-10 w-10 text-ink-muted" aria-hidden="true" />
           <p className="mt-3 text-sm font-medium text-foreground">Keine verifizierten Dokumente</p>
           <p className="mt-1 text-sm text-ink-muted">
@@ -137,18 +144,20 @@ export default function Export() {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border bg-card">
+        <div className="scroll-fade overflow-x-auto rounded-lg border border-border bg-card">
           <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-border">
                 <th className="px-4 py-2.5 text-left">
-                  <input
-                    type="checkbox"
-                    checked={selectedDocs.size === documents.length && documents.length > 0}
-                    onChange={selectAll}
-                    className="h-4 w-4 rounded border-border"
-                    aria-label="Alle auswählen"
-                  />
+                  <span className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedDocs.size === documents.length && documents.length > 0}
+                      onChange={selectAll}
+                      className="h-4 w-4 rounded border-border"
+                      aria-label="Alle auswählen"
+                    />
+                  </span>
                 </th>
                 <th className="px-4 py-2.5 text-left text-table-header">DOKUMENT</th>
                 <th className="px-4 py-2.5 text-left text-table-header">LIEFERANT</th>
@@ -161,22 +170,27 @@ export default function Export() {
               {documents.map((doc) => (
                 <tr
                   key={doc.id}
+                  role="row"
+                  tabIndex={0}
                   className={cn('cursor-pointer transition-colors hover:bg-muted', selectedDocs.has(doc.id) && 'bg-accent/5')}
                   onClick={() => toggleDoc(doc.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDoc(doc.id) } }}
                 >
                   <td className="px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedDocs.has(doc.id)}
-                      onChange={() => toggleDoc(doc.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="h-4 w-4 rounded border-border"
-                      aria-label={`${doc.file_name} auswählen`}
-                    />
+                    <span className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedDocs.has(doc.id)}
+                        onChange={() => toggleDoc(doc.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-4 w-4 rounded border-border"
+                        aria-label={`${doc.file_name} auswählen`}
+                      />
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <FileDown className="h-4 w-4 shrink-0 text-ink-muted" />
+                      <FileDown className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden="true" />
                       <span className="truncate text-sm font-medium text-foreground">{doc.file_name}</span>
                     </div>
                   </td>
@@ -199,5 +213,6 @@ export default function Export() {
         </div>
       )}
     </AppLayout>
+    </>
   )
 }

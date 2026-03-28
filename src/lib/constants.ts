@@ -26,6 +26,29 @@ export const SUBSCRIPTION_TIERS = {
   },
 } as const
 
+/** Tier keys for iteration */
+export const TIER_KEYS = ['starter', 'professional', 'enterprise'] as const
+
+/** Human-readable feature labels (DE) */
+export const FEATURE_LABELS: Record<string, string> = {
+  'ai-extraction': 'KI-Belegextraktion',
+  'qr-bill': 'QR-Rechnung Erkennung',
+  'kontenrahmen': 'Kontenrahmen-Mapping',
+  'multilingual': 'DE / FR / IT / EN',
+  'csv-export': 'CSV-Export',
+  'bexio-export': 'Bexio-Export',
+  'all-erp-export': 'Alle ERP-Exporte',
+  'anomaly-detection': 'Anomalie-Erkennung',
+  'vendor-learning': 'Lieferanten-Lernen',
+  'batch-upload': 'Batch-Upload',
+  'priority-support': 'Priority Support',
+  'api-access': 'API-Zugang',
+  'custom-mapping': 'Benutzerdefinierte Kontierung',
+  'multi-user': 'Multi-User',
+  'onboarding-call': 'Onboarding-Call',
+  'phone-support': 'Telefon-Support',
+}
+
 /** Document processing statuses */
 export const DOCUMENT_STATUSES = {
   uploading: { label: 'Hochladen', color: 'info' },

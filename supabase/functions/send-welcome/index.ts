@@ -20,10 +20,13 @@ Deno.serve(async (req) => {
   try {
     const { user } = await authenticateRequest(req)
 
-    const adminClient = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    )
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!supabaseUrl || !serviceRoleKey) {
+      return jsonResponse({ sent: false, reason: 'Server misconfiguration' })
+    }
+
+    const adminClient = createClient(supabaseUrl, serviceRoleKey)
 
     const { data: { user: authUser }, error } = await adminClient.auth.admin.getUserById(user.id)
     if (error || !authUser?.email) {

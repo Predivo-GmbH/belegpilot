@@ -14,10 +14,11 @@ export function useProfile() {
     queryKey: ['profile', user?.id],
     enabled: !!user,
     queryFn: async () => {
+      if (!user) throw new Error('No user')
       const { data, error } = await supabase
         .from('profiles')
         .select('*, organizations(*)')
-        .eq('id', user!.id)
+        .eq('id', user.id)
         .single()
 
       if (error) throw error

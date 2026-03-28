@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
 import { useQueryClient } from '@tanstack/react-query'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { PageMeta } from '@/components/shared/PageMeta'
 import { toast } from 'sonner'
 
 const ACCEPTED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/tiff']
@@ -114,7 +115,7 @@ export default function Upload() {
               Authorization: `Bearer ${session.access_token}`,
             },
             body: JSON.stringify({ documentId: inserted.id, filePath }),
-          }).catch(console.error)
+          }).catch(() => { /* silent: fire-and-forget */ })
         }
       }
 
@@ -143,6 +144,8 @@ export default function Upload() {
   const pendingCount = files.filter((f) => f.status === 'pending').length
 
   return (
+    <>
+    <PageMeta title="Upload" noindex />
     <AppLayout
       title="Dokument hochladen"
       subtitle="Laden Sie Belege, Rechnungen und Kontoauszüge hoch zur automatischen Verarbeitung."
@@ -150,7 +153,7 @@ export default function Upload() {
         pendingCount > 0 ? (
           <button
             onClick={handleUploadAll}
-            className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
           >
             <CloudUpload className="h-4 w-4" />
             {pendingCount} Datei{pendingCount > 1 ? 'en' : ''} hochladen
@@ -167,13 +170,13 @@ export default function Upload() {
         onDragLeave={() => setIsDragOver(false)}
         onDrop={handleDrop}
         className={cn(
-          'flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 transition-colors',
+          'flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors sm:p-12',
           isDragOver
             ? 'border-primary bg-accent'
             : 'border-border bg-card hover:border-primary/50',
         )}
       >
-        <CloudUpload className={cn('h-10 w-10', isDragOver ? 'text-primary' : 'text-ink-muted')} />
+        <CloudUpload className={cn('h-10 w-10', isDragOver ? 'text-primary' : 'text-ink-muted')} aria-hidden="true" />
         <p className="mt-3 text-sm font-medium text-foreground">
           Dateien hierher ziehen oder klicken zum Auswählen
         </p>
@@ -181,7 +184,7 @@ export default function Upload() {
           PDF, JPG, PNG, TIFF — max. 20 MB pro Datei
         </p>
         <label className="mt-4 cursor-pointer">
-          <span className="inline-flex h-8 items-center rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted">
+          <span className="inline-flex min-h-[44px] items-center rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted">
             Dateien auswählen
           </span>
           <input
@@ -204,12 +207,12 @@ export default function Upload() {
           <div className="divide-y divide-border rounded-lg border border-border bg-card">
             {files.map((f) => (
               <div key={f.id} className="flex items-center gap-3 px-4 py-3">
-                <File className="h-4 w-4 shrink-0 text-ink-muted" />
+                <File className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden="true" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm text-foreground" title={f.file.name}>{f.file.name}</p>
                   <p className="text-xs text-ink-muted">
                     {(f.file.size / 1024).toFixed(0)} KB
-                    {f.error && <span className="ml-2 text-status-error">{f.error}</span>}
+                    {f.error && <span role="alert" className="ml-2 text-status-error">{f.error}</span>}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -217,19 +220,25 @@ export default function Upload() {
                     <span className="text-xs text-ink-muted">Bereit</span>
                   )}
                   {f.status === 'uploading' && (
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <span role="status">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
+                      <span className="sr-only">Wird hochgeladen...</span>
+                    </span>
                   )}
                   {f.status === 'processing' && (
-                    <Loader2 className="h-4 w-4 animate-spin text-status-warning" />
+                    <span role="status">
+                      <Loader2 className="h-4 w-4 animate-spin text-status-warning" aria-hidden="true" />
+                      <span className="sr-only">Wird verarbeitet...</span>
+                    </span>
                   )}
                   {f.status === 'done' && (
-                    <CheckCircle className="h-4 w-4 text-status-success" />
+                    <CheckCircle className="h-4 w-4 text-status-success" aria-hidden="true" />
                   )}
                   {f.status === 'error' && (
-                    <AlertCircle className="h-4 w-4 text-status-error" />
+                    <AlertCircle className="h-4 w-4 text-status-error" aria-hidden="true" />
                   )}
                   {f.status === 'pending' && (
-                    <button onClick={() => removeFile(f.id)} aria-label="Datei entfernen" className="text-ink-muted hover:text-foreground">
+                    <button onClick={() => removeFile(f.id)} aria-label="Datei entfernen" className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-ink-muted hover:text-foreground">
                       <X className="h-4 w-4" aria-hidden="true" />
                     </button>
                   )}
@@ -240,5 +249,6 @@ export default function Upload() {
         </div>
       )}
     </AppLayout>
+    </>
   )
 }

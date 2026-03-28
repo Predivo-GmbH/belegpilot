@@ -2,12 +2,14 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BelegPilot — KI-Belegverarbeitung für Schweizer Treuhand</title>
     <meta name="description" content="Ihre Mandanten schicken Schuhkartons voller Belege — BelegPilot macht daraus in Sekunden fertige Buchungssätze. Funktioniert mit Bexio, Abacus, Sage und Banana." />
     <meta name="theme-color" content="#0E7C6B" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
     <link rel="canonical" href="https://belegpilot.predivo.ch/" />
 
     <!-- Open Graph -->
@@ -17,19 +19,58 @@
     <meta property="og:url" content="https://belegpilot.predivo.ch/" />
     <meta property="og:site_name" content="BelegPilot" />
     <meta property="og:locale" content="de_CH" />
+    <meta property="og:image" content="https://belegpilot.predivo.ch/logo-email.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="BelegPilot — KI-Belegverarbeitung für Schweizer Treuhand" />
     <meta name="twitter:description" content="Belege verarbeiten. Automatisch. Präzise. Swiss." />
+    <meta name="twitter:image" content="https://belegpilot.predivo.ch/logo-email.png" />
+    <meta name="twitter:site" content="@predivo_ch" />
+    <meta name="twitter:creator" content="@predivo_ch" />
 
-    <!-- Fonts -->
+    <!-- Fonts: primary font eagerly, mono font deferred (only used for financial data) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
+    <!-- JetBrains Mono: loaded async, no preload (only needed on Dashboard/Documents/Export pages) -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" /></noscript>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "BelegPilot",
+      "description": "KI-Belegverarbeitung für Schweizer Treuhand. Aus Schuhkartons voller Belege werden fertige Buchungssätze.",
+      "url": "https://belegpilot.predivo.ch",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "offers": [
+        { "@type": "Offer", "name": "Starter", "price": "49", "priceCurrency": "CHF" },
+        { "@type": "Offer", "name": "Professional", "price": "149", "priceCurrency": "CHF" },
+        { "@type": "Offer", "name": "Enterprise", "price": "249", "priceCurrency": "CHF" }
+      ],
+      "provider": {
+        "@type": "Organization",
+        "name": "Predivo GmbH",
+        "url": "https://predivo.ch"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="padding:2rem;text-align:center;font-family:system-ui,sans-serif">
+        <h1>BelegPilot</h1>
+        <p>BelegPilot benötigt JavaScript. Bitte aktivieren Sie JavaScript in Ihren Browser-Einstellungen.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

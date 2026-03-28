@@ -1,0 +1,26 @@
+{
+  "name": "BelegPilot",
+  "short_name": "BelegPilot",
+  "description": "KI-Belegverarbeitung für Schweizer Treuhand",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F0F7F5",
+  "theme_color": "#0E7C6B",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

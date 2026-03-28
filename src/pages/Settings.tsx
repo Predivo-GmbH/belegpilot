@@ -8,8 +8,10 @@ import { supabase } from '@/lib/supabase'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Database } from '@/types/database'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { PageMeta } from '@/components/shared/PageMeta'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 
@@ -23,7 +25,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
   { id: 'security', label: 'Sicherheit' },
 ]
 
-const inputClass = 'h-10 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground placeholder:text-ink-muted focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring'
+const inputClass = 'min-h-[44px] w-full rounded-md border border-input bg-card px-3 text-base md:text-sm text-foreground placeholder:text-ink-muted focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring'
 
 export default function Settings() {
   usePageTitle('Einstellungen')
@@ -39,10 +41,11 @@ export default function Settings() {
     queryKey: ['team-members', org?.id],
     enabled: !!org?.id && tab === 'team',
     queryFn: async () => {
+      if (!org) throw new Error('No org')
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('organization_id', org!.id)
+        .eq('organization_id', org.id)
       if (error) throw error
       return data as unknown as ProfileRow[]
     },
@@ -51,10 +54,11 @@ export default function Settings() {
   // Update org name mutation
   const updateOrgMutation = useMutation({
     mutationFn: async (name: string) => {
+      if (!org) throw new Error('No org')
       const { error } = await supabase
         .from('organizations')
         .update({ name })
-        .eq('id', org!.id)
+        .eq('id', org.id)
       if (error) throw error
     },
     onSuccess: () => {
@@ -95,6 +99,32 @@ export default function Settings() {
     }
   }
 
+  // Delete account confirmation
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const handleDeleteAccount = async () => {
+    setShowDeleteConfirm(false)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) throw new Error('Keine aktive Sitzung')
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error ?? 'Fehler beim Löschen')
+      }
+      await supabase.auth.signOut()
+      window.location.href = '/'
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Konto konnte nicht gelöscht werden')
+    }
+  }
+
   // Plan change via Stripe
   const [isChangingPlan, setIsChangingPlan] = useState(false)
   const handleChangePlan = async () => {
@@ -132,15 +162,21 @@ export default function Settings() {
   const tier = SUBSCRIPTION_TIERS[currentPlan]
 
   return (
+    <>
+    <PageMeta title="Einstellungen" noindex />
     <AppLayout title="Einstellungen" subtitle="Verwalten Sie Ihre Firmen- und Kontoeinstellungen.">
       {/* Tabs */}
-      <div className="mb-6 flex gap-1 border-b border-border">
+      <div role="tablist" className="scroll-fade scroll-fade-bg mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-1 overflow-x-auto border-b border-border scrollbar-none" style={{ scrollSnapType: 'x mandatory' }}>
         {TABS.map((t) => (
           <button
             key={t.id}
+            id={`tab-${t.id}`}
+            role="tab"
+            aria-selected={tab === t.id}
+            aria-controls={`panel-${t.id}`}
             onClick={() => setTab(t.id)}
             className={cn(
-              'border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
+              'min-h-[44px] shrink-0 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors snap-start',
               tab === t.id
                 ? 'border-primary text-primary'
                 : 'border-transparent text-ink-secondary hover:text-foreground',
@@ -154,6 +190,9 @@ export default function Settings() {
       {/* Firm Profile */}
       {tab === 'firm' && (
         <form
+          id="panel-firm"
+          role="tabpanel"
+          aria-labelledby="tab-firm"
           className="max-w-xl space-y-6"
           onSubmit={(e) => {
             e.preventDefault()
@@ -177,7 +216,7 @@ export default function Settings() {
           <button
             type="submit"
             disabled={updateOrgMutation.isPending}
-            className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover disabled:opacity-50"
           >
             {updateOrgMutation.isPending ? 'Wird gespeichert...' : 'Änderungen speichern'}
           </button>
@@ -187,9 +226,9 @@ export default function Settings() {
 
       {/* Team */}
       {tab === 'team' && (
-        <div className="space-y-4">
+        <div id="panel-team" role="tabpanel" aria-labelledby="tab-team" className="space-y-4">
           <h2 className="text-lg font-semibold text-foreground">Teammitglieder</h2>
-          <div className="overflow-x-auto rounded-lg border border-border bg-card">
+          <div className="scroll-fade overflow-x-auto rounded-lg border border-border bg-card">
             <table className="w-full min-w-[400px]">
               <thead>
                 <tr className="border-b border-border">
@@ -229,11 +268,11 @@ export default function Settings() {
 
       {/* ERP Export Formats */}
       {tab === 'erp' && (
-        <div className="space-y-4">
+        <div id="panel-erp" role="tabpanel" aria-labelledby="tab-erp" className="space-y-4">
           <h2 className="text-lg font-semibold text-foreground">ERP-Exportformate</h2>
           <p className="text-sm text-ink-secondary">BelegPilot unterstützt alle gängigen Schweizer ERP-Systeme. Wählen Sie beim Export einfach das gewünschte Format aus.</p>
-          <div className="rounded-lg border border-border bg-card">
-            <table className="w-full">
+          <div className="scroll-fade overflow-x-auto rounded-lg border border-border bg-card">
+            <table className="w-full min-w-[400px]">
               <thead>
                 <tr className="border-b border-border">
                   <th className="px-4 py-2.5 text-left text-table-header">ERP-SYSTEM</th>
@@ -261,10 +300,10 @@ export default function Settings() {
 
       {/* Billing */}
       {tab === 'billing' && (
-        <div className="space-y-6">
+        <div id="panel-billing" role="tabpanel" aria-labelledby="tab-billing" className="space-y-6">
           <h2 className="text-lg font-semibold text-foreground">Aktueller Plan</h2>
-          <div className="rounded-lg border border-border bg-card p-6">
-            <div className="flex items-start justify-between">
+          <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-sm text-ink-muted">Plan</p>
                 <p className="text-lg font-semibold text-foreground">{tier.name} — CHF {tier.price}/Monat</p>
@@ -276,17 +315,17 @@ export default function Settings() {
                 <button
                   onClick={handleChangePlan}
                   disabled={isChangingPlan}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
                 >
-                  {isChangingPlan && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  {isChangingPlan ? 'Laden...' : 'Upgrade'}
+                  {isChangingPlan && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+                  {isChangingPlan ? <><span role="status" className="sr-only">Laden...</span>Laden...</> : 'Upgrade'}
                 </button>
               )}
             </div>
           </div>
 
           <h2 className="text-lg font-semibold text-foreground">Nutzung diesen Monat</h2>
-          <div className="rounded-lg border border-border bg-card p-6">
+          <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
             <div className="flex items-center justify-between text-sm">
               <span className="text-ink-secondary">Dokumente verarbeitet</span>
               <span className="font-mono font-medium text-foreground">
@@ -307,7 +346,7 @@ export default function Settings() {
 
       {/* Security */}
       {tab === 'security' && (
-        <div className="max-w-xl space-y-6">
+        <div id="panel-security" role="tabpanel" aria-labelledby="tab-security" className="max-w-xl space-y-6">
           <h2 className="text-lg font-semibold text-foreground">Passwort ändern</h2>
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div>
@@ -318,9 +357,9 @@ export default function Settings() {
               <label htmlFor="confirm-password" className="mb-1 block text-sm font-medium text-foreground">Passwort bestätigen</label>
               <input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" className={inputClass} />
             </div>
-            {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
-            {passwordSuccess && <p className="text-sm text-status-success">Passwort erfolgreich geändert.</p>}
-            <button type="submit" className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover">
+            {passwordError && <p role="alert" className="text-sm text-destructive">{passwordError}</p>}
+            {passwordSuccess && <p role="status" className="text-sm text-status-success">Passwort erfolgreich geändert.</p>}
+            <button type="submit" className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover">
               Passwort ändern
             </button>
           </form>
@@ -331,29 +370,8 @@ export default function Settings() {
               Alle Ihre Daten, Dokumente und Teammitglieder werden unwiderruflich gelöscht.
             </p>
             <button
-              onClick={async () => {
-                if (!confirm('Sind Sie sicher? Alle Daten werden unwiderruflich gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.')) return
-                try {
-                  const { data: { session } } = await supabase.auth.getSession()
-                  if (!session?.access_token) throw new Error('Keine aktive Sitzung')
-                  const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${session.access_token}`,
-                    },
-                  })
-                  if (!res.ok) {
-                    const body = await res.json().catch(() => ({}))
-                    throw new Error(body.error ?? 'Fehler beim Löschen')
-                  }
-                  await supabase.auth.signOut()
-                  window.location.href = '/'
-                } catch (err) {
-                  toast.error(err instanceof Error ? err.message : 'Konto konnte nicht gelöscht werden')
-                }
-              }}
-              className="mt-3 inline-flex h-9 items-center rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="mt-3 inline-flex min-h-[44px] items-center rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"
             >
               Konto endgültig löschen
             </button>
@@ -361,5 +379,16 @@ export default function Settings() {
         </div>
       )}
     </AppLayout>
+    <ConfirmDialog
+      open={showDeleteConfirm}
+      title="Konto löschen"
+      description="Sind Sie sicher? Alle Daten werden unwiderruflich gelöscht. Diese Aktion kann nicht rückgängig gemacht werden."
+      confirmLabel="Endgültig löschen"
+      cancelLabel="Abbrechen"
+      variant="destructive"
+      onConfirm={handleDeleteAccount}
+      onCancel={() => setShowDeleteConfirm(false)}
+    />
+    </>
   )
 }

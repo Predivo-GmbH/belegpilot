@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /auth
+Disallow: /auth/callback
 Disallow: /dashboard
 Disallow: /documents
 Disallow: /upload

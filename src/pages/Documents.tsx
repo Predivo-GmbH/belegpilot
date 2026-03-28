@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { DOCUMENT_STATUSES } from '@/lib/constants'
 import { useDocuments } from '@/hooks/useDocuments'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { PageMeta } from '@/components/shared/PageMeta'
 
 type StatusFilter = 'all' | keyof typeof DOCUMENT_STATUSES
 
@@ -23,40 +24,42 @@ export default function Documents() {
   const { data: documents, isLoading } = useDocuments({ status: filter, search })
 
   return (
+    <>
+    <PageMeta title="Dokumente" noindex />
     <AppLayout
       title="Dokumente"
       subtitle={`${documents?.length ?? 0} Dokumente in allen Mandanten`}
       action={
         <Link
           to="/upload"
-          className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
+          className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
         >
           Upload
         </Link>
       }
     >
       {/* Filters */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="relative w-full sm:flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" aria-hidden="true" />
           <input
             type="text"
             placeholder="Dokumente durchsuchen..."
             aria-label="Dokumente durchsuchen"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-9 w-full rounded-md border border-input bg-card pl-9 pr-3 text-sm text-foreground placeholder:text-ink-muted focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+            className="min-h-[44px] w-full rounded-md border border-input bg-card pl-9 pr-3 text-base md:text-sm text-foreground placeholder:text-ink-muted focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
-        <div className="flex items-center gap-1">
-          <Filter className="h-4 w-4 text-ink-muted" />
+        <div className="scroll-fade scroll-fade-bg flex items-center gap-1 overflow-x-auto scrollbar-none" style={{ scrollSnapType: 'x mandatory' }}>
+          <Filter className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden="true" />
           {(['all', 'review', 'verified', 'exported'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               aria-current={filter === f ? 'page' : undefined}
               className={cn(
-                'rounded-full px-3 py-1 text-xs font-medium transition-colors',
+                'min-h-[44px] shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-colors',
                 filter === f
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-ink-secondary hover:bg-accent hover:text-accent-foreground',
@@ -71,11 +74,14 @@ export default function Documents() {
       {/* Table */}
       <div className="rounded-lg border border-border bg-card">
         {isLoading ? (
-          <div className="flex items-center justify-center p-12">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="space-y-3 p-4" role="status">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-12 rounded-md bg-muted animate-pulse" />
+            ))}
+            <span className="sr-only">Laden...</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="scroll-fade overflow-x-auto">
             <table className="w-full min-w-[600px]">
               <thead>
                 <tr className="border-b border-border">
@@ -93,7 +99,7 @@ export default function Documents() {
                     <tr key={doc.id} className="hover:bg-muted/50">
                       <td className="px-4 py-3">
                         <Link to={`/documents/${doc.id}`} className="flex items-center gap-2 text-sm text-foreground hover:text-primary">
-                          <FileText className="h-4 w-4 shrink-0 text-ink-muted" />
+                          <FileText className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden="true" />
                           {doc.file_name}
                         </Link>
                       </td>
@@ -123,5 +129,6 @@ export default function Documents() {
         )}
       </div>
     </AppLayout>
+    </>
   )
 }

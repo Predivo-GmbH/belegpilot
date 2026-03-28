@@ -1,55 +1,9 @@
-import { Link } from 'react-router-dom'
-import { SUBSCRIPTION_TIERS } from '@/lib/constants'
-import { cn } from '@/lib/utils'
+import { Link, useNavigate } from 'react-router-dom'
+import type { TIER_KEYS } from '@/lib/constants'
 import { usePageTitle } from '@/hooks/usePageTitle'
-
-/* ── Logo component (reused from sidebar) ── */
-function BelegPilotLogo({ size = 'sm' }: { size?: 'sm' | 'lg' }) {
-  const dim = size === 'lg' ? 'h-10 w-10' : 'h-8 w-8'
-  const svg = size === 'lg' ? 22 : 18
-  return (
-    <div className={cn('flex items-center justify-center rounded-lg bg-foreground', dim)}>
-      <svg width={svg} height={svg} viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <path
-          d="M10 37c-2 0-3-1-3-4-0.5-8-0.5-18 0-26 0-3 2-4 4-4l8 0c6 0 10 4 10 9 0 4-3 7-7 7.5 5 0.5 9 4.5 9 9 0 5.5-5 8.5-11 8.5z m3-29c0 0 4-0.5 6 0 3 1 4.5 2.5 4.5 4.5 0 2-1.5 4-5 4.5l-5.5 0z m0 14c0 0 5-0.5 7 0 3 1 5 3 5 5.5 0 2.5-2 4.5-5.5 4.5l-6.5 0z"
-          fill="#0E7C6B"
-          fillRule="evenodd"
-        />
-      </svg>
-    </div>
-  )
-}
-
-/* ── Inline check icon ── */
-function Check() {
-  return (
-    <svg className="mt-0.5 h-4 w-4 shrink-0 text-primary" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M13.25 4.75L6 12 2.75 8.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-/* ── Feature labels ── */
-const FEATURE_LABELS: Record<string, string> = {
-  'ai-extraction': 'KI-Belegextraktion',
-  'qr-bill': 'QR-Rechnung Erkennung',
-  'kontenrahmen': 'Kontenrahmen-Mapping',
-  'multilingual': 'DE / FR / IT / EN',
-  'csv-export': 'CSV-Export',
-  'bexio-export': 'Bexio-Export',
-  'all-erp-export': 'Alle ERP-Exporte',
-  'anomaly-detection': 'Anomalie-Erkennung',
-  'vendor-learning': 'Lieferanten-Lernen',
-  'batch-upload': 'Batch-Upload',
-  'priority-support': 'Priority Support',
-  'api-access': 'API-Zugang',
-  'custom-mapping': 'Benutzerdefinierte Kontierung',
-  'multi-user': 'Multi-User',
-  'onboarding-call': 'Onboarding-Call',
-  'phone-support': 'Telefon-Support',
-}
-
-const TIER_KEYS = ['starter', 'professional', 'enterprise'] as const
+import { PageMeta } from '@/components/shared/PageMeta'
+import { BelegPilotLogo } from '@/components/shared/BelegPilotLogo'
+import { PricingGrid } from '@/components/shared/PricingGrid'
 
 /* ── Features for the grid section ── */
 const FEATURES = [
@@ -138,8 +92,19 @@ const STEPS = [
 
 export default function Landing() {
   usePageTitle()
+  const navigate = useNavigate()
+
+  function handleSelectPlan(tier: typeof TIER_KEYS[number]) {
+    navigate(`/auth?mode=signup&plan=${tier}`)
+  }
+
   return (
+    <>
+    <PageMeta title="KI-Belegverarbeitung für Schweizer Treuhand" description="Ihre Mandanten schicken Schuhkartons voller Belege — BelegPilot macht daraus in Sekunden fertige Buchungssätze." canonical="https://belegpilot.predivo.ch/" />
     <div className="min-h-screen bg-background">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">
+        Zum Hauptinhalt springen
+      </a>
       {/* ── Navbar ── */}
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
@@ -147,49 +112,50 @@ export default function Landing() {
             <BelegPilotLogo />
             <span className="text-sm font-semibold text-foreground">BelegPilot</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <nav aria-label="Hauptnavigation" className="flex items-center gap-1 sm:gap-3">
             <Link
               to="/pricing"
-              className="text-sm font-medium text-ink-secondary hover:text-foreground"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-2 text-sm font-medium text-ink-secondary hover:text-foreground sm:px-0"
             >
               Preise
             </Link>
             <Link
               to="/auth"
-              className="text-sm font-medium text-ink-secondary hover:text-foreground"
+              className="hidden min-h-[44px] items-center text-sm font-medium text-ink-secondary hover:text-foreground sm:inline-flex"
             >
               Anmelden
             </Link>
             <Link
               to="/auth?mode=signup"
-              className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
+              className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-accent-hover sm:px-4"
             >
               Kostenlos testen
             </Link>
-          </div>
+          </nav>
         </div>
       </header>
 
+      <main id="main-content">
       {/* ── Hero ── */}
-      <section className="px-4 pb-16 pt-20">
+      <section className="px-4 pb-10 pt-12 sm:pb-16 sm:pt-20">
         <div className="mx-auto max-w-3xl text-center">
           <p className="mb-4 text-micro-label">Für Schweizer Treuhandbüros</p>
-          <h1 className="text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
+          <h1 className="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
             Aus Schuhkartons voller Belege werden fertige Buchungssätze
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-lg text-ink-secondary">
             BelegPilot erkennt Rechnungen per KI, validiert MWST-Sätze und exportiert direkt in Ihr ERP — in Sekunden statt Stunden.
           </p>
-          <div className="mt-8 flex items-center justify-center gap-4">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Link
               to="/auth?mode=signup"
-              className="inline-flex h-10 items-center rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
+              className="inline-flex min-h-[44px] w-full items-center justify-center rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-accent-hover sm:w-auto"
             >
               14 Tage kostenlos testen
             </Link>
             <Link
               to="/dashboard"
-              className="inline-flex h-10 items-center rounded-md border border-border bg-card px-5 text-sm font-medium text-foreground hover:bg-muted"
+              className="inline-flex min-h-[44px] w-full items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-medium text-foreground hover:bg-muted sm:w-auto"
             >
               Demo ansehen
             </Link>
@@ -200,31 +166,31 @@ export default function Landing() {
 
       {/* ── Trust bar ── */}
       <section className="border-y border-border bg-card px-4 py-8">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-12 gap-y-4">
+        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-12 sm:gap-y-4">
           <div className="text-center">
             <p className="font-mono text-2xl font-bold text-foreground">50+</p>
             <p className="text-sm text-ink-muted">Treuhandbüros</p>
           </div>
-          <div className="h-8 w-px bg-border" />
+          <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
           <div className="text-center">
             <p className="font-mono text-2xl font-bold text-foreground">120&apos;000+</p>
             <p className="text-sm text-ink-muted">Belege verarbeitet</p>
           </div>
-          <div className="h-8 w-px bg-border" />
+          <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
           <div className="text-center">
             <p className="font-mono text-2xl font-bold text-foreground">99.2%</p>
             <p className="text-sm text-ink-muted">Erkennungsrate</p>
           </div>
-          <div className="h-8 w-px bg-border" />
+          <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
           <div className="text-center">
-            <p className="font-mono text-2xl font-bold text-foreground">Swiss Made</p>
+            <p className="font-mono text-xl font-bold text-foreground sm:text-2xl">Swiss Made</p>
             <p className="text-sm text-ink-muted">Hosting in der Schweiz</p>
           </div>
         </div>
       </section>
 
       {/* ── Features ── */}
-      <section className="px-4 py-20">
+      <section className="px-4 py-12 sm:py-20">
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 text-center">
             <p className="mb-2 text-micro-label">Funktionen</p>
@@ -235,7 +201,7 @@ export default function Landing() {
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
-              <div key={f.title} className="rounded-lg border border-border bg-card p-5">
+              <div key={f.title} className="rounded-lg border border-border bg-card p-3 sm:p-5">
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-accent">
                   {f.icon}
                 </div>
@@ -248,7 +214,7 @@ export default function Landing() {
       </section>
 
       {/* ── How it works ── */}
-      <section className="border-y border-border bg-card px-4 py-20">
+      <section className="border-y border-border bg-card px-4 py-12 sm:py-20">
         <div className="mx-auto max-w-4xl">
           <div className="mb-12 text-center">
             <p className="mb-2 text-micro-label">So funktioniert&apos;s</p>
@@ -268,7 +234,7 @@ export default function Landing() {
       </section>
 
       {/* ── Pricing ── */}
-      <section className="px-4 py-20">
+      <section className="px-4 py-12 sm:py-20">
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 text-center">
             <p className="mb-2 text-micro-label">Preise</p>
@@ -278,68 +244,7 @@ export default function Landing() {
             <p className="mt-2 text-sm text-ink-secondary">Jederzeit kündbar. 14 Tage kostenlos testen.</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {TIER_KEYS.map((key) => {
-              const tier = SUBSCRIPTION_TIERS[key]
-              const isPopular = key === 'professional'
-
-              return (
-                <div
-                  key={key}
-                  className={cn(
-                    'relative flex flex-col rounded-lg border bg-card p-6',
-                    isPopular ? 'border-primary' : 'border-border',
-                  )}
-                >
-                  {isPopular && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-medium text-primary-foreground">
-                      Beliebtester Plan
-                    </span>
-                  )}
-
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-foreground">{tier.name}</h3>
-                    <div className="mt-2 flex items-baseline gap-1">
-                      <span className="font-mono text-3xl font-bold text-foreground">
-                        {tier.currency} {tier.price}
-                      </span>
-                      <span className="text-sm text-ink-muted">/Monat</span>
-                    </div>
-                    <p className="mt-2 text-sm text-ink-secondary">
-                      {tier.documentsPerMonth === Infinity
-                        ? 'Unbegrenzte Dokumente'
-                        : `${tier.documentsPerMonth.toLocaleString()} Dokumente/Monat`}
-                      {' · '}
-                      {tier.maxClients === Infinity
-                        ? 'Unbegrenzt Mandanten'
-                        : `${tier.maxClients} Mandanten`}
-                    </p>
-                  </div>
-
-                  <ul className="mb-6 flex-1 space-y-2">
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2 text-sm text-ink-secondary">
-                        <Check />
-                        {FEATURE_LABELS[feature] ?? feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link
-                    to={`/auth?mode=signup&plan=${key}`}
-                    className={cn(
-                      'inline-flex h-10 w-full items-center justify-center rounded-md text-sm font-medium transition-colors',
-                      isPopular
-                        ? 'bg-primary text-primary-foreground hover:bg-accent-hover'
-                        : 'border border-border bg-card text-foreground hover:bg-muted',
-                    )}
-                  >
-                    {key === 'enterprise' ? 'Kontakt aufnehmen' : 'Jetzt starten'}
-                  </Link>
-                </div>
-              )
-            })}
-          </div>
+          <PricingGrid onSelectPlan={handleSelectPlan} />
 
           <p className="mt-8 text-center text-sm text-ink-muted">
             Alle Preise in CHF, exkl. MwSt.
@@ -348,7 +253,7 @@ export default function Landing() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="border-y border-border bg-card px-4 py-16">
+      <section className="border-y border-border bg-card px-4 py-10 sm:py-16">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-2xl font-bold text-foreground">Bereit, Ihre Belegverarbeitung zu automatisieren?</h2>
           <p className="mt-3 text-sm text-ink-secondary">
@@ -356,12 +261,13 @@ export default function Landing() {
           </p>
           <Link
             to="/auth?mode=signup"
-            className="mt-6 inline-flex h-10 items-center rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
+            className="mt-6 inline-flex min-h-[44px] items-center rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
           >
             14 Tage kostenlos testen
           </Link>
         </div>
       </section>
+      </main>
 
       {/* ── Footer ── */}
       <footer className="px-4 py-10">
@@ -370,15 +276,16 @@ export default function Landing() {
             <BelegPilotLogo />
             <span className="text-sm font-semibold text-foreground">BelegPilot</span>
           </div>
-          <div className="flex flex-wrap items-center gap-6 text-sm text-ink-muted">
-            <Link to="/pricing" className="hover:text-foreground">Preise</Link>
-            <span>Datenschutz</span>
-            <span>AGB</span>
-            <span>Impressum</span>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-ink-muted sm:gap-6">
+            <Link to="/pricing" className="inline-flex min-h-[44px] items-center hover:text-foreground">Preise</Link>
+            <Link to="/datenschutz" className="inline-flex min-h-[44px] items-center hover:text-foreground">Datenschutz</Link>
+            <Link to="/agb" className="inline-flex min-h-[44px] items-center hover:text-foreground">AGB</Link>
+            <Link to="/impressum" className="inline-flex min-h-[44px] items-center hover:text-foreground">Impressum</Link>
           </div>
           <p className="text-sm text-ink-muted">&copy; 2026 BelegPilot. Alle Rechte vorbehalten.</p>
         </div>
       </footer>
     </div>
+    </>
   )
 }

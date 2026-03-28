@@ -23,10 +23,13 @@ const PLAN_QUOTAS: Record<string, number> = {
 
 const ALERT_THRESHOLDS = [80, 100]
 
-const supabase = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-)
+const supabaseUrl = Deno.env.get('SUPABASE_URL')
+const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+if (!supabaseUrl || !serviceRoleKey) {
+  throw new Error('Missing required env vars: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY')
+}
+
+const supabase = createClient(supabaseUrl, serviceRoleKey)
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -93,7 +96,7 @@ serve(async (req: Request) => {
   } catch (error) {
     console.error('Usage alert error:', error)
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   }

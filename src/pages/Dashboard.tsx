@@ -6,6 +6,7 @@ import { useProfile } from '@/hooks/useProfile'
 import { useDashboardStats, useRecentDocuments } from '@/hooks/useDashboardStats'
 import { DOCUMENT_STATUSES } from '@/lib/constants'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { PageMeta } from '@/components/shared/PageMeta'
 
 const STATUS_STYLES: Record<string, string> = {
   success: 'text-status-success',
@@ -41,13 +42,15 @@ export default function Dashboard() {
   ]
 
   return (
+    <>
+    <PageMeta title="Dashboard" noindex />
     <AppLayout
       title="Dashboard"
       subtitle={`Willkommen bei BelegPilot${firstName ? `, ${firstName}` : ''}`}
       action={
         <Link
           to="/upload"
-          className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
+          className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-accent-hover"
         >
           Beleg hochladen
         </Link>
@@ -56,10 +59,10 @@ export default function Dashboard() {
       {/* Metric cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map((m) => (
-          <div key={m.label} className="rounded-lg border border-border bg-card p-5">
+          <div key={m.label} className="rounded-lg border border-border bg-card p-3 sm:p-5">
             <div className="flex items-center justify-between">
               <p className="text-table-header">{m.label}</p>
-              <m.icon className="h-4 w-4 text-ink-muted" strokeWidth={1.5} />
+              <m.icon className="h-4 w-4 text-ink-muted" strokeWidth={1.5} aria-hidden="true" />
             </div>
             <p className="mt-2 font-mono text-2xl font-semibold text-foreground">{m.value}</p>
             <p className={cn(
@@ -76,12 +79,12 @@ export default function Dashboard() {
       <div className="mt-6 rounded-lg border border-border bg-card">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h2 className="text-base font-semibold text-foreground">Letzte Dokumente</h2>
-          <Link to="/documents" className="text-sm font-medium text-primary hover:text-accent-foreground">
+          <Link to="/documents" className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary hover:text-accent-foreground">
             Alle anzeigen
           </Link>
         </div>
         {recentDocs && recentDocs.length > 0 ? (
-          <div className="overflow-x-auto">
+          <div className="scroll-fade overflow-x-auto">
           <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-border">
@@ -98,9 +101,9 @@ export default function Dashboard() {
                 const colorKey = statusInfo?.color ?? 'info'
                 return (
                   <tr key={doc.id} className="hover:bg-muted/50">
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3.5">
                       <Link to={`/documents/${doc.id}`} className="flex items-center gap-2 text-sm text-foreground hover:text-primary">
-                        <FileText className="h-4 w-4 shrink-0 text-ink-muted" />
+                        <FileText className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden="true" />
                         {doc.file_name}
                       </Link>
                     </td>
@@ -130,5 +133,6 @@ export default function Dashboard() {
         )}
       </div>
     </AppLayout>
+    </>
   )
 }

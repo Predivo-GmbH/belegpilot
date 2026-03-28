@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { BelegPilotLogo } from '@/components/shared/BelegPilotLogo'
 
 const NAV_SECTIONS = [
   {
@@ -47,20 +48,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     <>
       {/* Logo */}
       <div className="flex h-14 items-center gap-2.5 border-b border-border px-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
-          <svg width="18" height="18" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <path
-              d="M10 37c-2 0-3-1-3-4-0.5-8-0.5-18 0-26 0-3 2-4 4-4l8 0c6 0 10 4 10 9 0 4-3 7-7 7.5 5 0.5 9 4.5 9 9 0 5.5-5 8.5-11 8.5z m3-29c0 0 4-0.5 6 0 3 1 4.5 2.5 4.5 4.5 0 2-1.5 4-5 4.5l-5.5 0z m0 14c0 0 5-0.5 7 0 3 1 5 3 5 5.5 0 2.5-2 4.5-5.5 4.5l-6.5 0z"
-              fill="#0E7C6B"
-              fillRule="evenodd"
-            />
-          </svg>
-        </div>
+        <BelegPilotLogo />
         <span className="text-sm font-semibold text-foreground">BelegPilot</span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-4 overflow-y-auto p-3">
+      <nav aria-label="Hauptnavigation" className="flex-1 space-y-4 overflow-y-auto p-3">
         {NAV_SECTIONS.map((section, i) => (
           <div key={i}>
             {section.label && (
@@ -76,13 +69,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     to={item.href}
                     onClick={onNavigate}
                     className={cn(
-                      'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+                      'flex min-h-[44px] items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
                       isActive
                         ? 'bg-accent font-medium text-accent-foreground'
                         : 'text-ink-secondary hover:bg-muted hover:text-foreground'
                     )}
                   >
-                    <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                    <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
                     {item.label}
                   </Link>
                 )
@@ -97,13 +90,48 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function MobileMenuButton() {
   const [open, setOpen] = useState(false)
+  const drawerRef = useRef<HTMLDivElement>(null)
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setOpen(false)
+      return
+    }
+    if (e.key === 'Tab') {
+      const drawer = drawerRef.current
+      if (!drawer) return
+      const focusable = drawer.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!open) return
+    const drawer = drawerRef.current
+    if (!drawer) return
+    const focusable = drawer.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+    if (focusable.length > 0) focusable[0].focus()
+  }, [open])
 
   return (
     <>
       <button
         onClick={() => setOpen(true)}
         aria-label="Menü öffnen"
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-foreground hover:bg-muted lg:hidden"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-border bg-card text-foreground hover:bg-muted lg:hidden"
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -115,12 +143,19 @@ export function MobileMenuButton() {
             className="fixed inset-0 z-40 bg-foreground/20 lg:hidden"
             onClick={() => setOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col bg-card shadow-lg lg:hidden">
+          <div
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation"
+            onKeyDown={handleKeyDown}
+            className="fixed inset-y-0 left-0 z-50 flex w-[85vw] max-w-[260px] flex-col border-r border-border bg-card lg:hidden"
+          >
             <div className="flex items-center justify-end p-2">
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Menü schliessen"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-secondary hover:bg-muted"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-ink-secondary hover:bg-muted"
               >
                 <X className="h-5 w-5" />
               </button>

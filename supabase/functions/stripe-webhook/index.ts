@@ -8,13 +8,18 @@ import {
   trialEndingEmail,
 } from '../_shared/email.ts'
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { apiVersion: '2024-04-10' })
-const endpointSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!
+const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
+const endpointSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')
+const supabaseUrl = Deno.env.get('SUPABASE_URL')
+const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-const supabase = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-)
+if (!stripeKey || !endpointSecret || !supabaseUrl || !serviceRoleKey) {
+  throw new Error('Missing required env vars: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY')
+}
+
+const stripe = new Stripe(stripeKey, { apiVersion: '2024-04-10' })
+
+const supabase = createClient(supabaseUrl, serviceRoleKey)
 
 // ─── Plan tiers (low → high) ─────────────────────────────────────────────────
 
@@ -194,7 +199,7 @@ serve(async (req: Request) => {
   } catch (error) {
     console.error('Webhook handler error:', error)
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },
     )
   }

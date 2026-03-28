@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { PageMeta } from '@/components/shared/PageMeta'
 
 /**
  * Handles Supabase auth callbacks (magic links, password resets, email confirmations).
@@ -13,47 +14,35 @@ export default function AuthCallback() {
   const [status, setStatus] = useState('Wird verarbeitet...')
 
   useEffect(() => {
-    handleCallback()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  async function handleCallback() {
-    const { data: { session }, error } = await supabase.auth.getSession()
-
-    if (error) {
-      setStatus('Authentifizierungsfehler. Weiterleitung...')
-      navigate('/auth')
-      return
-    }
-
     // Parse the hash fragment for the callback type
     const hash = window.location.hash
     const params = new URLSearchParams(hash.replace('#', ''))
     const type = params.get('type')
 
-    if (type === 'recovery') {
-      // Password reset — redirect to reset form
-      navigate('/auth?mode=reset')
-    } else if (type === 'signup' || type === 'email') {
-      // Email confirmation — user is now verified
-      if (session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (type === 'recovery') {
+        navigate('/auth?mode=reset')
+      } else if (session) {
         navigate('/dashboard')
       } else {
+        setStatus('Authentifizierungsfehler. Weiterleitung...')
         navigate('/auth')
       }
-    } else if (session) {
-      navigate('/dashboard')
-    } else {
-      navigate('/auth')
-    }
-  }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [navigate])
 
   return (
-    <div className="flex h-screen items-center justify-center bg-background">
+    <>
+    <PageMeta title="Authentifizierung" noindex />
+    <div className="flex h-screen items-center justify-center bg-background" role="status">
       <div className="text-center">
         <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        <p className="mt-4 text-sm text-ink-secondary">{status}</p>
+        <p className="mt-4 text-sm text-ink-secondary" aria-live="polite">{status}</p>
+        <span className="sr-only">Laden...</span>
       </div>
     </div>
+    </>
   )
 }
