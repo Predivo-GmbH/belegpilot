@@ -1,4 +1,5 @@
 import { serve } from 'https://deno.land/std@0.208.0/http/server.ts'
+import { encode as encodeBase64 } from 'https://deno.land/std@0.208.0/encoding/base64.ts'
 import { authenticateRequest, errorResponse, jsonResponse } from '../_shared/auth.ts'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { extractZugferd, type ZugferdData } from '../_shared/zugferd.ts'
@@ -19,11 +20,11 @@ import { suggestAccount, SWISS_VAT_RATES, isValidSwissVatRate } from '../_shared
  */
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
-const AI_MODEL = 'claude-sonnet-4-5-20250514'
+const AI_MODEL = 'claude-haiku-4-5-20251001'
 
-// Pricing per million tokens (Sonnet)
-const INPUT_COST_PER_MTOK = 3.0
-const OUTPUT_COST_PER_MTOK = 15.0
+// Pricing per million tokens (Haiku 4.5)
+const INPUT_COST_PER_MTOK = 0.80
+const OUTPUT_COST_PER_MTOK = 4.0
 
 interface ExtractedField<T = string> {
   value: T
@@ -64,10 +65,15 @@ serve(async (req: Request) => {
   }
 
   const startTime = Date.now()
+  let capturedDocumentId: string | null = null
+  // deno-lint-ignore no-explicit-any
+  let capturedAdminClient: any = null
 
   try {
     const { user, adminClient } = await authenticateRequest(req)
+    capturedAdminClient = adminClient
     const { documentId, filePath } = await req.json()
+    capturedDocumentId = documentId
 
     if (!documentId || !filePath) {
       return jsonResponse({ error: 'documentId and filePath are required' }, 400)
@@ -132,7 +138,7 @@ serve(async (req: Request) => {
       throw new Error('ANTHROPIC_API_KEY not configured')
     }
 
-    const base64Data = btoa(String.fromCharCode(...fileBytes))
+    const base64Data = encodeBase64(fileBytes)
     const mediaType = isPdf ? 'application/pdf' : doc.file_type
 
     // Build the content block for Claude
@@ -334,22 +340,20 @@ Rules:
     const processingDuration = Date.now() - startTime
     console.error('process-document error:', error)
 
-    // Try to update document status to error
+    // Update document status to error using captured variables
     try {
-      const { adminClient } = await authenticateRequest(req)
-      const { documentId } = await req.json().catch(() => ({ documentId: null }))
-      if (documentId) {
-        await adminClient
+      if (capturedDocumentId && capturedAdminClient) {
+        await capturedAdminClient
           .from('documents')
           .update({
             status: 'error',
             error_message: (error as Error).message,
             processing_duration_ms: processingDuration,
           })
-          .eq('id', documentId)
+          .eq('id', capturedDocumentId)
       }
-    } catch {
-      // Can't update — just log
+    } catch (updateErr) {
+      console.error('Failed to update document error status:', updateErr)
     }
 
     return errorResponse(error)

@@ -89,14 +89,23 @@ function useDocumentPreview(filePath: string | undefined) {
     let cancelled = false
     supabase.storage
       .from('documents')
-      .createSignedUrl(filePath, 3600)
+      .download(filePath)
       .then(({ data }) => {
-        if (!cancelled && data?.signedUrl) setPreviewUrl(data.signedUrl)
+        if (!cancelled && data) {
+          const blobUrl = URL.createObjectURL(data)
+          setPreviewUrl(blobUrl)
+        }
       })
       .finally(() => {
         if (!cancelled) setIsLoadingPreview(false)
       })
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+      setPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev)
+        return null
+      })
+    }
   }, [filePath])
 
   return { previewUrl, isLoadingPreview }
@@ -226,7 +235,6 @@ export default function DocumentReview() {
                 src={previewUrl}
                 className="h-full w-full"
                 title="Dokumentvorschau"
-                sandbox="allow-same-origin"
               />
             ) : previewUrl && isImage ? (
               <img
