@@ -232,7 +232,7 @@ export default function DocumentReview() {
               </div>
             ) : previewUrl && isPdf ? (
               <embed
-                src={previewUrl}
+                src={`${previewUrl}#toolbar=1&navpanes=0&view=FitH`}
                 type="application/pdf"
                 className="h-full w-full"
                 title="Dokumentvorschau"
