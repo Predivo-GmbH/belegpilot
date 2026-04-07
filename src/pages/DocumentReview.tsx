@@ -217,14 +217,14 @@ export default function DocumentReview() {
         </div>
       }
     >
-      {/* Split pane */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Split pane — PDF gets 2/3, data gets 1/3 */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
         {/* Left: Original document preview */}
         <div className="rounded-lg border border-border bg-card">
           <div className="border-b border-border px-4 py-3">
             <h2 className="text-sm font-medium text-foreground">Original</h2>
           </div>
-          <div className="h-[min(400px,50vh)] overflow-auto bg-muted lg:h-[min(600px,70vh)]">
+          <div className="h-[60vh] bg-muted lg:h-[calc(100vh-13rem)]">
             {isLoadingPreview ? (
               <div className="flex h-full items-center justify-center" role="status">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -257,7 +257,7 @@ export default function DocumentReview() {
         </div>
 
         {/* Right: Extracted data */}
-        <div className="rounded-lg border border-border bg-card">
+        <div className="rounded-lg border border-border bg-card self-start lg:sticky lg:top-4">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h2 className="text-sm font-medium text-foreground">Extrahierte Daten</h2>
           </div>
