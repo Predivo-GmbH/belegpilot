@@ -231,9 +231,10 @@ export default function DocumentReview() {
                 <span className="sr-only">Laden...</span>
               </div>
             ) : previewUrl && isPdf ? (
-              <iframe
+              <embed
                 src={`${previewUrl}#toolbar=1&navpanes=0&view=FitH`}
-                className="h-full w-full border-0"
+                type="application/pdf"
+                className="h-full w-full"
                 title="Dokumentvorschau"
               />
             ) : previewUrl && isImage ? (
