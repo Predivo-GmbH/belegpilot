@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, CheckCircle, Download, FileText, Loader2 } from 'lucide-react'
+import { PdfViewer } from '@/components/shared/PdfViewer'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { cn } from '@/lib/utils'
 import { useDocument } from '@/hooks/useDocuments'
@@ -231,11 +232,9 @@ export default function DocumentReview() {
                 <span className="sr-only">Laden...</span>
               </div>
             ) : previewUrl && isPdf ? (
-              <embed
-                src={`${previewUrl}#toolbar=1&navpanes=0&view=FitH`}
-                type="application/pdf"
-                className="h-full w-full"
-                title="Dokumentvorschau"
+              <PdfViewer
+                url={previewUrl}
+                className="flex h-full flex-col"
               />
             ) : previewUrl && isImage ? (
               <img
