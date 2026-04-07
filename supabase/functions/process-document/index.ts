@@ -66,7 +66,7 @@ serve(async (req: Request) => {
 
   const startTime = Date.now()
   let capturedDocumentId: string | null = null
-  // deno-lint-ignore no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let capturedAdminClient: any = null
 
   try {
