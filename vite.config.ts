@@ -25,6 +25,8 @@ export default defineConfig({
               return 'query-vendor'
             if (id.includes('/@radix-ui/') || id.includes('/radix-ui/') || id.includes('/class-variance-authority/'))
               return 'ui-vendor'
+            if (id.includes('/pdfjs-dist/'))
+              return 'pdfjs-vendor'
             if (id.includes('/lucide-react/'))
               return 'icons-vendor'
             if (id.includes('/sonner/'))

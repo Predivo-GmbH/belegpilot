@@ -85,11 +85,11 @@ export default function Documents() {
             <table className="w-full min-w-[600px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="px-4 py-3 text-left text-table-header">DOKUMENT</th>
-                  <th className="px-4 py-3 text-left text-table-header">MANDANT</th>
-                  <th className="px-4 py-3 text-left text-table-header">STATUS</th>
-                  <th className="px-4 py-3 text-right text-table-header">BETRAG</th>
-                  <th className="px-4 py-3 text-right text-table-header">DATUM</th>
+                  <th className="px-4 py-2.5 text-left text-table-header">DOKUMENT</th>
+                  <th className="px-4 py-2.5 text-left text-table-header">MANDANT</th>
+                  <th className="px-4 py-2.5 text-left text-table-header">STATUS</th>
+                  <th className="px-4 py-2.5 text-right text-table-header">BETRAG</th>
+                  <th className="px-4 py-2.5 text-right text-table-header">DATUM</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

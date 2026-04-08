@@ -91,10 +91,16 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 export function MobileMenuButton() {
   const [open, setOpen] = useState(false)
   const drawerRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  const closeDrawer = useCallback(() => {
+    setOpen(false)
+    triggerRef.current?.focus()
+  }, [])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
-      setOpen(false)
+      closeDrawer()
       return
     }
     if (e.key === 'Tab') {
@@ -129,6 +135,7 @@ export function MobileMenuButton() {
   return (
     <>
       <button
+        ref={triggerRef}
         onClick={() => setOpen(true)}
         aria-label="Menü öffnen"
         className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-border bg-card text-foreground hover:bg-muted lg:hidden"
@@ -141,7 +148,7 @@ export function MobileMenuButton() {
         <>
           <div
             className="fixed inset-0 z-40 bg-foreground/20 lg:hidden"
-            onClick={() => setOpen(false)}
+            onClick={closeDrawer}
           />
           <div
             ref={drawerRef}
@@ -153,14 +160,14 @@ export function MobileMenuButton() {
           >
             <div className="flex items-center justify-end p-2">
               <button
-                onClick={() => setOpen(false)}
+                onClick={closeDrawer}
                 aria-label="Menü schliessen"
                 className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-ink-secondary hover:bg-muted"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <SidebarContent onNavigate={() => setOpen(false)} />
+            <SidebarContent onNavigate={closeDrawer} />
           </div>
         </>
       )}

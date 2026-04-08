@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, CheckCircle, Download, FileText, Loader2 } from 'lucide-react'
-import { PdfViewer } from '@/components/shared/PdfViewer'
+
+const PdfViewer = lazy(() => import('@/components/shared/PdfViewer').then(m => ({ default: m.PdfViewer })))
 import { AppLayout } from '@/components/layout/AppLayout'
 import { cn } from '@/lib/utils'
 import { useDocument } from '@/hooks/useDocuments'
@@ -158,7 +159,7 @@ export default function DocumentReview() {
   if (isLoading) {
     return (
       <AppLayout title="Dokument laden..." subtitle="">
-        <div className="flex items-center justify-center p-12" role="status">
+        <div className="flex items-center justify-center p-12" role="status" aria-live="polite">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
           <span className="sr-only">Laden...</span>
         </div>
@@ -219,29 +220,33 @@ export default function DocumentReview() {
       }
     >
       {/* Split pane — PDF gets 2/3, data gets 1/3 */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_1fr] lg:grid-cols-[2fr_1fr]">
         {/* Left: Original document preview */}
         <div className="rounded-lg border border-border bg-card">
           <div className="border-b border-border px-4 py-3">
             <h2 className="text-sm font-medium text-foreground">Original</h2>
           </div>
-          <div className="h-[60vh] bg-muted lg:h-[calc(100vh-13rem)]">
+          <div className="h-[calc(100dvh-10rem)] bg-muted lg:h-[calc(100vh-13rem)]">
             {isLoadingPreview ? (
-              <div className="flex h-full items-center justify-center" role="status">
+              <div className="flex h-full items-center justify-center" role="status" aria-live="polite">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 <span className="sr-only">Laden...</span>
               </div>
             ) : previewUrl && isPdf ? (
-              <PdfViewer
-                url={previewUrl}
-                className="flex h-full flex-col"
-              />
+              <Suspense fallback={<div className="flex h-full items-center justify-center" role="status" aria-live="polite"><Loader2 className="h-6 w-6 animate-spin text-primary" /><span className="sr-only">PDF wird geladen...</span></div>}>
+                <PdfViewer
+                  url={previewUrl}
+                  className="flex h-full flex-col"
+                />
+              </Suspense>
             ) : previewUrl && isImage ? (
-              <img
-                src={previewUrl}
-                alt={doc.file_name}
-                className="h-full w-full object-contain p-4"
-              />
+              <div className="flex h-full items-center justify-center p-4">
+                <img
+                  src={previewUrl}
+                  alt={doc.file_name}
+                  className="max-h-full max-w-full object-contain aspect-[3/4]"
+                />
+              </div>
             ) : (
               <div className="flex h-full items-center justify-center text-center">
                 <div>

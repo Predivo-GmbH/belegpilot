@@ -36,6 +36,16 @@ serve(async (req: Request) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // Verify the caller is using the service role key
+  const authHeader = req.headers.get('Authorization')
+  const expectedToken = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!authHeader || authHeader !== `Bearer ${expectedToken}`) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    )
+  }
+
   try {
     // Parse optional org_id from body
     let targetOrgId: string | null = null
