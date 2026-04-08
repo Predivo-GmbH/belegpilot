@@ -24,43 +24,49 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_PASSWORD_GATE: ${{ secrets.VITE_PASSWORD_GATE }}
 
+      - name: Install lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
       # Zero-downtime 3-step deploy to Metanet (plain FTP)
       # Step 1: Upload new assets (JS/CSS with hashed names)
       - name: Upload assets
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          protocol: ftp
-          security: loose
-          local-dir: ./dist/assets/
-          server-dir: belegpilot.predivo.ch/assets/
-          dangerous-clean-slate: false
+        run: |
+          lftp -u "$FTP_USER,$FTP_PASS" "ftp://$FTP_HOST" <<SCRIPT
+          set ftp:ssl-allow no
+          mirror --reverse --verbose --no-perms \
+            ./dist/assets/ belegpilot.predivo.ch/assets/
+          bye
+          SCRIPT
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
 
       # Step 2: Upload everything else (HTML, .htaccess, favicon)
       - name: Upload root files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          protocol: ftp
-          security: loose
-          local-dir: ./dist/
-          server-dir: belegpilot.predivo.ch/
-          exclude: |
-            **/assets/**
+        run: |
+          lftp -u "$FTP_USER,$FTP_PASS" "ftp://$FTP_HOST" <<SCRIPT
+          set ftp:ssl-allow no
+          mirror --reverse --verbose --no-perms \
+            --exclude assets/ \
+            ./dist/ belegpilot.predivo.ch/
+          bye
+          SCRIPT
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
 
       # Step 3: Clean stale assets
       - name: Clean old assets
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          protocol: ftp
-          security: loose
-          local-dir: ./dist/assets/
-          server-dir: belegpilot.predivo.ch/assets/
-          dangerous-clean-slate: true
+        run: |
+          lftp -u "$FTP_USER,$FTP_PASS" "ftp://$FTP_HOST" <<SCRIPT
+          set ftp:ssl-allow no
+          mirror --reverse --verbose --no-perms --delete \
+            ./dist/assets/ belegpilot.predivo.ch/assets/
+          bye
+          SCRIPT
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
