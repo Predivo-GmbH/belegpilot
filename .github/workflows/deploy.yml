@@ -12,7 +12,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
@@ -27,7 +27,7 @@ jobs:
       # Zero-downtime 3-step deploy to Metanet (plain FTP)
       # Step 1: Upload new assets (JS/CSS with hashed names)
       - name: Upload assets
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
@@ -40,7 +40,7 @@ jobs:
 
       # Step 2: Upload everything else (HTML, .htaccess, favicon)
       - name: Upload root files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
@@ -54,7 +54,7 @@ jobs:
 
       # Step 3: Clean stale assets
       - name: Clean old assets
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
