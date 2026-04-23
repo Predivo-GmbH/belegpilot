@@ -28,6 +28,7 @@ dist-ssr
 # Credentials — never commit
 docs/Supabase/
 cred.txt
+docs/Credentials.txt
 
 # Test artifacts
 playwright-report/
