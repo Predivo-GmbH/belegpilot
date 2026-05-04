@@ -26,6 +26,12 @@ jobs:
       - name: Coverage
         run: npm run test:coverage
 
+      - name: Install Playwright
+        run: npx playwright install chromium --with-deps
+
+      - name: Critical Path E2E (MUST PASS)
+        run: npx playwright test e2e/critical-path.spec.ts
+
       - name: E2E Tests
         run: npm run test:e2e
         continue-on-error: true
