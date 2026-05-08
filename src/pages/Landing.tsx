@@ -272,9 +272,13 @@ export default function Landing() {
       {/* ── Footer ── */}
       <footer className="px-4 py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="flex items-center gap-2.5">
-            <BelegPilotLogo />
-            <span className="text-sm font-semibold text-foreground">BelegPilot</span>
+          <div>
+            <div className="flex items-center gap-2.5">
+              <BelegPilotLogo />
+              <span className="text-sm font-semibold text-foreground">BelegPilot</span>
+            </div>
+            <p className="mt-2 max-w-xs text-xs leading-relaxed text-ink-muted">KI-gest&uuml;tzte Belegerfassung f&uuml;r Schweizer Treuhand und KMU.</p>
+            <p className="mt-1.5 text-[10px] text-ink-muted/60">Swiss-made &middot; Datenschutzkonform</p>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm text-ink-muted sm:gap-6">
             <Link to="/pricing" className="inline-flex min-h-[44px] items-center hover:text-foreground">Preise</Link>
