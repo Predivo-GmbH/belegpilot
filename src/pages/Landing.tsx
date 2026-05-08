@@ -282,7 +282,7 @@ export default function Landing() {
             <Link to="/agb" className="inline-flex min-h-[44px] items-center hover:text-foreground">AGB</Link>
             <Link to="/impressum" className="inline-flex min-h-[44px] items-center hover:text-foreground">Impressum</Link>
           </div>
-          <p className="text-sm text-ink-muted">&copy; 2026 BelegPilot. Alle Rechte vorbehalten.</p>
+          <p className="text-sm text-ink-muted">&copy; 2026 BelegPilot by Predivo GmbH. Alle Rechte vorbehalten.</p>
         </div>
       </footer>
     </div>
