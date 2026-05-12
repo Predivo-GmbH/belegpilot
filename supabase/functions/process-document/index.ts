@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.208.0/http/server.ts'
 import { encode as encodeBase64 } from 'https://deno.land/std@0.208.0/encoding/base64.ts'
 import { authenticateRequest, errorResponse, jsonResponse } from '../_shared/auth.ts'
 import { getCorsHeaders } from '../_shared/cors.ts'
+import { logAnthropicUsage } from '../_shared/log-usage.ts'
 import { extractZugferd, type ZugferdData } from '../_shared/zugferd.ts'
 import { suggestAccount, SWISS_VAT_RATES, isValidSwissVatRate } from '../_shared/swiss-accounts.ts'
 
@@ -209,6 +210,7 @@ Rules:
     }
 
     const apiResult = await apiResponse.json()
+    await logAnthropicUsage('BelegPilot', 'process-document', apiResult)
 
     // Calculate cost
     const inputTokens = apiResult.usage?.input_tokens ?? 0
