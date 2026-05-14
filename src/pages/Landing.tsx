@@ -278,7 +278,7 @@ export default function Landing() {
               <span className="text-sm font-semibold text-foreground">BelegPilot</span>
             </div>
             <p className="mt-2 max-w-xs text-xs leading-relaxed text-ink-muted">KI-gest&uuml;tzte Belegerfassung f&uuml;r Schweizer Treuhand und KMU.</p>
-            <p className="mt-1.5 text-[10px] text-ink-muted/60">Swiss-made &middot; Datenschutzkonform</p>
+            <p className="mt-1.5 text-[10px] text-ink-muted/60">Swiss-made &middot; Software that Thinks Ahead</p>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm text-ink-muted sm:gap-6">
             <Link to="/pricing" className="inline-flex min-h-[44px] items-center hover:text-foreground">Preise</Link>
