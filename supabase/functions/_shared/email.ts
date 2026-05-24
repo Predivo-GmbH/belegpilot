@@ -111,8 +111,10 @@ function layout(body: string): string {
           <tr>
             <td style="padding:20px 32px;background:#fafafa;border-top:1px solid #e4e4e7;">
               <p style="margin:0;font-size:12px;color:#71717a;line-height:1.5;">
-                &copy; ${new Date().getFullYear()} BelegPilot &middot;
-                <a href="${APP_URL}" style="color:#71717a;">belegpilot.predivo.ch</a>
+                &copy; ${new Date().getFullYear()} BelegPilot by Predivo GmbH. Alle Rechte vorbehalten.
+              </p>
+              <p style="margin:4px 0 0;font-size:12px;color:#a1a1aa;">
+                Swiss-made &middot; Software that Thinks Ahead
               </p>
               <p style="margin:4px 0 0;font-size:12px;color:#a1a1aa;">
                 Sie erhalten diese E-Mail, weil Sie ein BelegPilot-Konto besitzen.
