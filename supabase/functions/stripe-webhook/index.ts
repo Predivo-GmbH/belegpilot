@@ -7,6 +7,7 @@ import {
   planChangedEmail,
   trialEndingEmail,
 } from '../_shared/email.ts'
+import { logError } from '../_shared/error-log.ts'
 
 const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
 const endpointSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')
@@ -142,7 +143,7 @@ serve(async (req: Request) => {
           const admin = await getOrgAdminByCustomerId(customerId)
           if (admin) {
             const { subject, html } = planChangedEmail(admin.name, newPlan, isUpgrade)
-            await sendEmail({ to: admin.email, subject, html }).catch(console.error)
+            await sendEmail({ to: admin.email, subject, html }).catch(err => logError('stripe-webhook', 'plan_changed_email', err, { eventType: event.type }))
           }
         }
         break
@@ -175,7 +176,7 @@ serve(async (req: Request) => {
         const admin = await getOrgAdminByCustomerId(customerId)
         if (admin) {
           const { subject, html } = trialEndingEmail(admin.name, daysLeft)
-          await sendEmail({ to: admin.email, subject, html }).catch(console.error)
+          await sendEmail({ to: admin.email, subject, html }).catch(err => logError('stripe-webhook', 'trial_ending_email', err, { eventType: event.type }))
         }
         break
       }
@@ -187,7 +188,7 @@ serve(async (req: Request) => {
         const admin = await getOrgAdminByCustomerId(customerId)
         if (admin) {
           const { subject, html } = paymentFailedEmail(admin.name)
-          await sendEmail({ to: admin.email, subject, html }).catch(console.error)
+          await sendEmail({ to: admin.email, subject, html }).catch(err => logError('stripe-webhook', 'payment_failed_email', err, { eventType: event.type }))
         }
         break
       }

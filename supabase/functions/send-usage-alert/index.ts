@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.208.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 import { sendEmail, usageAlertEmail } from '../_shared/email.ts'
+import { logError } from '../_shared/error-log.ts'
 
 /**
  * send-usage-alert: Check document usage quotas and send alerts at 80% and 100%.
@@ -95,7 +96,7 @@ serve(async (req: Request) => {
       const userName = user.user_metadata?.full_name ?? user.email
       const { subject, html } = usageAlertEmail(userName, org.name, usage, limit, percentage)
 
-      await sendEmail({ to: user.email, subject, html }).catch(console.error)
+      await sendEmail({ to: user.email, subject, html }).catch(err => logError('send-usage-alert', 'usage_alert_email', err, { orgId: org.id, percentage }))
       alertsSent++
     }
 

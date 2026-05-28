@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.208.0/http/server.ts'
 import { authenticateRequest, errorResponse, jsonResponse, AuthError } from '../_shared/auth.ts'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { sendEmail, accountDeletedEmail } from '../_shared/email.ts'
+import { logError } from '../_shared/error-log.ts'
 
 /**
  * delete-account: Permanently delete the authenticated user's account and all data.
@@ -82,7 +83,7 @@ serve(async (req: Request) => {
     // 7. Send deletion confirmation email (best-effort, before auth delete)
     if (userEmail) {
       const { subject, html } = accountDeletedEmail(userName)
-      await sendEmail({ to: userEmail, subject, html }).catch(console.error)
+      await sendEmail({ to: userEmail, subject, html }).catch(err => logError('delete-account', 'deletion_confirmation_email', err, { userId: user.id }))
     }
 
     // 8. Delete auth user (must be last — loses the JWT)
