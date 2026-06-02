@@ -74,6 +74,7 @@ const MOCK_IMAGE_DOCUMENT = {
   status: 'review',
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MOCK_VERIFIED_DOCUMENT = {
   ...MOCK_PDF_DOCUMENT,
   id: 'doc-verified-001',
@@ -143,6 +144,7 @@ function mockStorageDownload(page: Page) {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function mockStorageSignedUrl(page: Page) {
   return page.route(`${SUPABASE_URL}/storage/v1/object/sign/**`, (route) =>
     route.fulfill({

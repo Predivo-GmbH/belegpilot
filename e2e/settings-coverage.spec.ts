@@ -209,6 +209,7 @@ test.describe('Settings — Abrechnung Tab: Plan and Usage (SET-005)', () => {
     await expect(page.getByText('42 / 200')).toBeVisible()
 
     // Progress bar exists
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const progressBar = page.locator('.bg-primary').filter({ has: page.locator('.h-full') })
     // The progress bar container with rounded-full class
     await expect(page.locator('.overflow-hidden.rounded-full.bg-muted')).toBeVisible()

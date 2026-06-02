@@ -115,6 +115,7 @@ test.describe('Documents — Search Filter (DOC-002)', () => {
   test('search input filters documents by file name', async ({ page }) => {
     await setupAuthenticated(page)
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
     let searchQuery = ''
     await page.route(`${SUPABASE_URL}/rest/v1/documents*`, (route) => {
       const url = route.request().url()
