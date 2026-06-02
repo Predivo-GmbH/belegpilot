@@ -199,6 +199,7 @@ export default function Auth() {
     if (error) {
       setError(friendlyError(error.message))
     } else {
+      await supabase.auth.signOut()
       setResetDone(true)
     }
     setLoading(false)
