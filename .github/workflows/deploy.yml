@@ -46,7 +46,7 @@ jobs:
 
       - name: Verify deploy target (site-id guard)
         run: |
-          REMOTE_ID=$(lftp -u "$FTP_USER,$FTP_PASS" "ftp://$FTP_HOST" -e "set ftp:ssl-allow no; cat belegpilot.predivo.ch/.site-id; quit" 2>/dev/null || echo "")
+          REMOTE_ID=$(lftp -u "$FTP_USER,$FTP_PASS" "ftp://$FTP_HOST" -e "set ftp:ssl-force yes; set ssl:verify-certificate no; set ftp:ssl-protect-data no; cat belegpilot.predivo.ch/.site-id; quit" 2>/dev/null || echo "")
           if [ -n "$REMOTE_ID" ] && [ "$REMOTE_ID" != "belegpilot" ]; then
             echo "::error::DEPLOY ABORTED — remote .site-id is '$REMOTE_ID', expected 'belegpilot'. Wrong FTP target!"
             exit 1
@@ -62,7 +62,7 @@ jobs:
       - name: Upload assets
         run: |
           lftp -u "$FTP_USER,$FTP_PASS" "ftp://$FTP_HOST" <<SCRIPT
-          set ftp:ssl-allow no
+          set ftp:ssl-force yes; set ssl:verify-certificate no; set ftp:ssl-protect-data no
           mirror --reverse --verbose --no-perms \
             ./dist/assets/ belegpilot.predivo.ch/assets/
           bye
@@ -76,7 +76,7 @@ jobs:
       - name: Upload root files
         run: |
           lftp -u "$FTP_USER,$FTP_PASS" "ftp://$FTP_HOST" <<SCRIPT
-          set ftp:ssl-allow no
+          set ftp:ssl-force yes; set ssl:verify-certificate no; set ftp:ssl-protect-data no
           mirror --reverse --verbose --no-perms \
             --exclude assets/ \
             ./dist/ belegpilot.predivo.ch/
@@ -91,7 +91,7 @@ jobs:
       - name: Clean old assets
         run: |
           lftp -u "$FTP_USER,$FTP_PASS" "ftp://$FTP_HOST" <<SCRIPT
-          set ftp:ssl-allow no
+          set ftp:ssl-force yes; set ssl:verify-certificate no; set ftp:ssl-protect-data no
           mirror --reverse --verbose --no-perms --delete \
             ./dist/assets/ belegpilot.predivo.ch/assets/
           bye
