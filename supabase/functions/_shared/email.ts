@@ -132,7 +132,7 @@ function layout(body: string): string {
                 &copy; ${new Date().getFullYear()} BelegPilot by Predivo GmbH. Alle Rechte vorbehalten.
               </p>
               <p style="margin:4px 0 0;font-size:12px;color:#a1a1aa;">
-                Swiss-made &middot; Software that Thinks Ahead
+                Swiss-made
               </p>
               <p style="margin:4px 0 0;font-size:12px;color:#a1a1aa;">
                 Sie erhalten diese E-Mail, weil Sie ein BelegPilot-Konto besitzen.
